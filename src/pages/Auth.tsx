@@ -7,7 +7,7 @@ import AddToHomeScreenInfoPopup from "@/components/AddToHomeScreenInfoPopup";
 
 // You can use a suitable royalty-free image here (replace the src if needed)
 const HERO_IMAGE =
-  "https://images.unsplash.com/photo-1649972904349-6e44c42644a7?auto=format&fit=crop&w=600&q=80"; // woman with laptop, cozy mood
+  "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80"; // smiling mother and daughter drinking water
 
 const DEMO_EMAIL = "demo@painpal.com";
 const DEMO_PASSWORD = "123456";
