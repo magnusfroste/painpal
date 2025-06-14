@@ -91,14 +91,17 @@ const MigrainePreliminaryAnalysis = ({ history }: { history: any[] }) => {
   const assistantId = "asst_QdGLwLL2mn8p46MZ0xuryV3S";
   const { analysis, loading, error } = useAssistantAnalysis({ history, assistantId });
 
-  // Helper: Try to gracefully parse a JSON string with analysis/recommendations
+  // Helper: Try to gracefully parse a JSON string with analysis/recommendations/data/remember
   function parseAnalysis(analysis: string | null) {
     if (!analysis) return null;
     try {
       const trimmed = analysis.trim();
       if (trimmed.startsWith("{") && trimmed.endsWith("}")) {
         const obj = JSON.parse(trimmed);
-        if (typeof obj === "object" && (obj.analysis || obj.recommendations)) {
+        if (
+          typeof obj === "object" &&
+          (obj.analysis || obj.recommendations || obj.datapoints || obj.remember)
+        ) {
           return obj;
         }
       }
@@ -123,10 +126,16 @@ const MigrainePreliminaryAnalysis = ({ history }: { history: any[] }) => {
             <b>Recommendations:</b><br/>
             <span>${formatField(parsed.recommendations)}</span>
           </div>
-          ${parsed.Datapoints
+          ${parsed.datapoints
             ? `<div class="mb-2">
                 <b>Datapoints:</b><br/>
-                <span>${formatField(parsed.Datapoints)}</span>
+                <span>${formatField(parsed.datapoints)}</span>
+              </div>`
+            : ""}
+          ${parsed.remember
+            ? `<div class="mb-2">
+                <b>Remember:</b><br/>
+                <span>${formatField(parsed.remember)}</span>
               </div>`
             : ""}
         </div>
