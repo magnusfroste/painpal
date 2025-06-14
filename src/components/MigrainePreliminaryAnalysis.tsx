@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useAssistantAnalysis } from "@/hooks/useAssistantAnalysis";
 
@@ -77,11 +78,43 @@ const MigrainePreliminaryAnalysis = ({ history }: { history: any[] }) => {
   const assistantId = "asst_QdGLwLL2mn8p46MZ0xuryV3S";
   const { analysis, loading, error } = useAssistantAnalysis({ history, assistantId });
 
+  // Helper: Try to gracefully parse a JSON string with analysis/recommendations
+  function parseAnalysis(analysis: string | null) {
+    if (!analysis) return null;
+    try {
+      const trimmed = analysis.trim();
+      if (trimmed.startsWith("{") && trimmed.endsWith("}")) {
+        const obj = JSON.parse(trimmed);
+        if (typeof obj === "object" && (obj.analysis || obj.recommendations)) {
+          return obj;
+        }
+      }
+    } catch {
+      // not valid JSON
+    }
+    return null;
+  }
+
+  const parsed = parseAnalysis(analysis);
+
   const commentaryHTML = !history.length
     ? "No headaches logged yet. When you do, you'll see a friendly analysis here!"
-    : analysis
-      ? analysis.replace(/\n/g, "<br/>")
-      : friendlyCommentary(history);
+    : parsed
+        ? `
+          <div>
+            <div class="mb-2">
+              <b>Analysis:</b><br/>
+              <span>${parsed.analysis ? parsed.analysis.replace(/\n/g, "<br/>") : ""}</span>
+            </div>
+            <div>
+              <b>Recommendations:</b><br/>
+              <span>${parsed.recommendations ? parsed.recommendations.replace(/\n/g, "<br/>") : ""}</span>
+            </div>
+          </div>
+        `
+        : analysis
+          ? analysis.replace(/\n/g, "<br/>")
+          : friendlyCommentary(history);
 
   return (
     <section className="w-full mb-4">
