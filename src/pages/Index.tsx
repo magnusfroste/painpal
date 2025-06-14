@@ -160,7 +160,7 @@ const Index = () => {
   return (
     <div className="min-h-screen w-full flex flex-col items-center justify-start bg-gradient-to-b from-blue-200 via-purple-100 to-pink-100 relative font-sans overflow-x-hidden
       sm:pt-safe sm:pb-safe">
-      <AddToHomeScreenBanner />
+      {/* <AddToHomeScreenBanner /> -- moved to sign up info popup */}
       {saveError && <ErrorToast message={saveError} onClose={() => setSaveError(null)} />}
       {/* "Apple style" blurred top bar */}
       <header className="w-full z-40 flex flex-col items-center pt-8 mb-3 py-[5px]">

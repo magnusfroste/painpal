@@ -1,8 +1,9 @@
-
 import React, { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { Info } from "lucide-react";
+import AddToHomeScreenInfoPopup from "@/components/AddToHomeScreenInfoPopup";
 
 // You can use a suitable royalty-free image here (replace the src if needed)
 const HERO_IMAGE =
@@ -27,6 +28,7 @@ const Auth = () => {
   const [password, setPassword] = useState(DEMO_PASSWORD);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showHomeScreenInfo, setShowHomeScreenInfo] = useState(false);
 
   // Check if already logged in
   useEffect(() => {
@@ -78,6 +80,23 @@ const Auth = () => {
           alt="Person using a laptop, relaxed"
           className="rounded-xl w-full max-w-xs mb-4 shadow-md animate-fade-in"
         />
+        {/* Show info icon/button ONLY in signup mode */}
+        {mode === "signup" && (
+          <div className="flex justify-center mb-4">
+            <button
+              type="button"
+              className="flex items-center gap-2 px-3 py-1 rounded-xl bg-blue-50 hover:bg-blue-100 border border-blue-200 shadow-sm text-blue-900 font-medium transition animate-fade-in"
+              onClick={() => setShowHomeScreenInfo(true)}
+            >
+              <Info className="w-5 h-5" />
+              How to install on Home Screen (iOS)
+            </button>
+            <AddToHomeScreenInfoPopup
+              open={showHomeScreenInfo}
+              onOpenChange={setShowHomeScreenInfo}
+            />
+          </div>
+        )}
         <form onSubmit={handleSubmit} className="w-full max-w-xs mx-auto flex flex-col gap-4">
           <input
             type="email"
