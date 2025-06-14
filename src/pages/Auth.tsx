@@ -16,7 +16,7 @@ const VALUE_PROP = (
   <>
     <h1 className="text-3xl md:text-4xl font-extrabold text-blue-800 mb-2 text-center animate-fade-in">PainPal</h1>
     <p className="text-base md:text-lg text-gray-800 mb-5 text-center max-w-xs mx-auto animate-fade-in delay-100">
-      Track your migraines effortlessly. Share your journey with your doctor, discover helpful insights, and reclaim your life!
+      Track your migraines effortlessly. Discover helpful insights, share your journey with your doctor, and reclaim your life!
     </p>
   </>
 );
