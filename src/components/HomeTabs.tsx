@@ -18,6 +18,7 @@ interface HomeTabsProps {
   isMobile?: boolean;
   setWizardOpen: (open: boolean) => void;
   wizardOpen: boolean;
+  onTabChange?: (tab: string) => void; // NEW
 }
 
 const TAB_ICONS = {
@@ -43,10 +44,17 @@ const HomeTabs: React.FC<HomeTabsProps> = ({
   isMobile = false,
   setWizardOpen,
   wizardOpen,
+  onTabChange, // NEW
 }) => {
   // Analysis tab available only if user has entries
   const hasHistory = history.length > 0;
   const [activeTab, setActiveTab] = React.useState("track");
+
+  // NEW: When tab changes, also notify parent
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    if (onTabChange) onTabChange(tab);
+  };
 
   // Tab order
   const tabs = [
@@ -60,7 +68,7 @@ const HomeTabs: React.FC<HomeTabsProps> = ({
     <Tabs
       defaultValue="track"
       className={`w-full`}
-      onValueChange={setActiveTab}
+      onValueChange={handleTabChange}
     >
       <TabsList
         className={`

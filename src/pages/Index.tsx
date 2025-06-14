@@ -23,13 +23,22 @@ const ErrorToast = ({
     <span>⚠️ {message}</span>
     <button onClick={onClose} className="ml-4 underline text-white">Dismiss</button>
   </div>;
+
+const TAB_HEADER_MAP: Record<string, string> = {
+  track: "Welcome back, superstar! I’m here to help whenever you need me 🤗",
+  analysis: "Let’s discover some insights together from your data 📈",
+  learn: "Level up your knowledge — learn, get tips and feel empowered! 🧠",
+  history: "Here is your journey so far. Keep tracking for revealing patterns! 🌈",
+};
+
 const Index = () => {
   const [history, setHistory] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false); // Track saving state for UI feedback
+  const [saving, setSaving] = useState(false);
   const [celebrate, setCelebrate] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [wizardOpen, setWizardOpen] = useState(true);
+  const [activeTab, setActiveTab] = useState<string>("track");
   const navigate = useNavigate();
   const isMobile = useIsMobile();
 
@@ -139,12 +148,26 @@ const Index = () => {
       <header className="w-full z-40 flex flex-col items-center pt-8 mb-3 py-[5px]">
         <div className="w-full max-w-[440px] backdrop-blur-xl bg-white/60 rounded-3xl shadow-xl py-1 mx-2 mb-3 border border-white/50 px-[8px]">
           <AINurseMascot variant={celebrate ? "celebrate" : history.length > 0 ? "welcome" : "normal"} />
+          {/* NEW: Dynamic friendly message based on tab */}
+          <div className="text-center mt-2 text-base md:text-lg font-semibold text-blue-950 transition-all min-h-[44px]" aria-live="polite">
+            {TAB_HEADER_MAP[activeTab] || TAB_HEADER_MAP["track"]}
+          </div>
         </div>
       </header>
 
       <main className="flex-1 w-full flex flex-col items-center px-0 py-0 pb-24">
         <div className="w-full max-w-[440px] flex flex-col items-stretch flex-1 mx-auto">
-          <HomeTabs history={history} loading={loading} saving={saving} celebrate={celebrate} handleEntryAdd={handleEntryAdd} isMobile={isMobile} setWizardOpen={setWizardOpen} wizardOpen={wizardOpen} />
+          <HomeTabs
+            history={history}
+            loading={loading}
+            saving={saving}
+            celebrate={celebrate}
+            handleEntryAdd={handleEntryAdd}
+            isMobile={isMobile}
+            setWizardOpen={setWizardOpen}
+            wizardOpen={wizardOpen}
+            onTabChange={setActiveTab}
+          />
           <div className="py-[10px]" />
         </div>
       </main>
