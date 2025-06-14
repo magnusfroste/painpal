@@ -59,21 +59,24 @@ const MigraineStepWizard = ({
       setAnswers(nextAnswers);
       setCurrentStep(currentStep + 1);
     } else {
-      // All done! Disable buttons immediately
+      // All done! Disable buttons *immediately*
       setDisabled(true);
-      onComplete({
-        where: nextAnswers[0],
-        amount: nextAnswers[1],
-        when: nextAnswers[2],
-        cause: nextAnswers[3],
-        timestamp: new Date().toISOString(),
-      });
-      // Reset after thank you
+      // Force re-render before triggering onComplete to ensure UI disables last options
       setTimeout(() => {
-        setAnswers([]);
-        setCurrentStep(0);
-        setDisabled(false);
-      }, 1100); // same as feedback/celebrate duration in Index.tsx
+        onComplete({
+          where: nextAnswers[0],
+          amount: nextAnswers[1],
+          when: nextAnswers[2],
+          cause: nextAnswers[3],
+          timestamp: new Date().toISOString(),
+        });
+        // Reset after thank you
+        setTimeout(() => {
+          setAnswers([]);
+          setCurrentStep(0);
+          setDisabled(false);
+        }, 1100); // same as feedback/celebrate duration in Index.tsx
+      }, 0);
     }
   };
 
@@ -116,3 +119,4 @@ const MigraineStepWizard = ({
 };
 
 export default MigraineStepWizard;
+
