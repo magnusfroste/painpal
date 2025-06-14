@@ -20,6 +20,7 @@ const ErrorToast = ({ message, onClose }: { message: string; onClose: () => void
 const Index = () => {
   const [history, setHistory] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false); // Track saving state for UI feedback
   const [celebrate, setCelebrate] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -31,59 +32,68 @@ const Index = () => {
     });
   }, [navigate]);
 
-  // Load migraine entries from Supabase for the current user
-  useEffect(() => {
-    async function fetchEntries() {
-      setLoading(true);
-      try {
-        // Get user
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session?.user) {
-          setHistory([]); // Not authenticated
-        } else {
-          const { data, error } = await supabase
-            .from("migraine_entries")
-            .select("*")
-            .eq("user_id", session.user.id)
-            .order("timestamp", { ascending: true });
-          if (error) {
-            setSaveError("Unable to load your migraine history.");
-            setHistory([]);
-          } else if (data) setHistory(data);
-        }
-      } catch (e) {
-        setSaveError("Something went wrong loading your history.");
+  // Helper: fetch all entries in the table for the current user (ordered chronologically)
+  const fetchEntries = async () => {
+    setLoading(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) {
         setHistory([]);
+      } else {
+        const { data, error } = await supabase
+          .from("migraine_entries")
+          .select("*")
+          .eq("user_id", session.user.id)
+          .order("timestamp", { ascending: true });
+        if (error) {
+          setSaveError("Unable to load your migraine history.");
+          setHistory([]);
+        } else if (data) {
+          setHistory(data);
+        }
       }
-      setLoading(false);
+    } catch (e) {
+      setSaveError("Something went wrong loading your history.");
+      setHistory([]);
     }
+    setLoading(false);
+  };
+
+  // Initial fetch
+  useEffect(() => {
     fetchEntries();
-    // Optionally subscribe to changes here for realtime if you want
+    // eslint-disable-next-line
   }, []);
 
-  // Add entry to Supabase
+  // Add entry to Supabase, then reload all entries from Supabase
   const handleEntryAdd = async (entry: any) => {
+    setSaving(true);
+    setSaveError(null);
+
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user) {
         setSaveError("You must be logged in to save headache entries.");
+        setSaving(false);
         return;
       }
       const insert = { ...entry, user_id: session.user.id };
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from("migraine_entries")
-        .insert([insert])
-        .select();
-      if (data && !error) {
-        setHistory([...history, ...data]);
-        setCelebrate(true);
-        setTimeout(() => setCelebrate(false), 2400);
-      } else if (error) {
+        .insert([insert]);
+      if (error) {
         setSaveError(error.message);
+        setSaving(false);
+        return;
       }
+      // Upon successful insert, always reload from Supabase (never trust local append)
+      await fetchEntries();
+      setCelebrate(true);
+      setTimeout(() => setCelebrate(false), 2400);
     } catch (err: any) {
       setSaveError("Could not save entry. Try refreshing the page.");
     }
+    setSaving(false);
   };
 
   // Decide if the user is new or returning (has entries)
@@ -122,7 +132,15 @@ const Index = () => {
         <div className="w-full max-w-[440px] flex flex-col items-stretch flex-1 mx-auto">
           <section className="w-full mb-4">
             <div className="rounded-[32px] bg-white/75 shadow-2xl border border-white/60 px-2 pt-4 pb-3">
-              <MigraineStepWizard onComplete={handleEntryAdd} />
+              <MigraineStepWizard
+                onComplete={handleEntryAdd}
+                disableAll={saving}
+              />
+              {saving && (
+                <div className="mt-3 text-base text-blue-500 text-center animate-pulse">
+                  Saving entry…
+                </div>
+              )}
               {celebrate && (
                 <div className="mt-3 text-xl font-bold text-green-600 animate-bounce text-center">
                   🎉 Thanks! <br /> Collecting this data is super helpful!
@@ -147,7 +165,6 @@ const Index = () => {
                   <InfoButton type="safe" />
                 </div>
               </aside>
-              {/* Export and History moved from footer to main scrollable content */}
               <div className="mt-4 flex flex-col gap-4">
                 <ExportDataButton history={history} />
                 <div className="w-full rounded-2xl bg-white/80 py-2 px-2 shadow-sm">
