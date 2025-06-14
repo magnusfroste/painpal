@@ -6,7 +6,7 @@ function isIosSafari() {
   const ua = window.navigator.userAgent;
   return (
     /iPad|iPhone|iPod/.test(ua) &&
-    !window.MSStream &&
+    !("MSStream" in window) &&
     // Not Chrome for iOS or FxiOS
     !/(CriOS|FxiOS|OPiOS|EdgiOS)/.test(ua)
   );
@@ -18,7 +18,7 @@ const AddToHomeScreenBanner = () => {
   useEffect(() => {
     // "Standalone" is true if the app is launched from the home screen.
     const isStandalone =
-      window.navigator.standalone ||
+      (window.navigator as any).standalone ||
       window.matchMedia("(display-mode: standalone)").matches;
     if (isIosSafari() && !isStandalone) {
       // Only show if not dismissed (store flag per browser session)
@@ -60,3 +60,4 @@ const AddToHomeScreenBanner = () => {
 };
 
 export default AddToHomeScreenBanner;
+
