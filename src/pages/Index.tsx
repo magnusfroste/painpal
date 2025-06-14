@@ -1,10 +1,10 @@
-
 import React, { useState } from "react";
 import MigraineStepWizard from "@/components/MigraineStepWizard";
 import MigrainHistoryChart from "@/components/MigrainHistoryChart";
 import ExportDataButton from "@/components/ExportDataButton";
 import InfoButton from "@/components/InfoButton";
 import AINurseMascot from "@/components/AINurseMascot";
+import MigrainePreliminaryAnalysis from "@/components/MigrainePreliminaryAnalysis";
 
 const Index = () => {
   const [history, setHistory] = useState<any[]>([]);
@@ -46,6 +46,8 @@ const Index = () => {
               )}
             </div>
           </section>
+          {/* Analysis appears after wizard, before 'Learn more' */}
+          <MigrainePreliminaryAnalysis history={history} />
           {/* Info Buttons */}
           <aside className="mt-5 mb-2 w-full flex flex-col items-center gap-2">
             <div className="text-lg font-extrabold text-purple-800 mb-1">Learn more:</div>
