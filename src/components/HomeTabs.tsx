@@ -163,4 +163,3 @@ const HomeTabs: React.FC<HomeTabsProps> = ({
 };
 
 export default HomeTabs;
-
