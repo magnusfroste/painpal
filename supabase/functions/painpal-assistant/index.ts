@@ -1,4 +1,3 @@
-
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
@@ -19,16 +18,15 @@ serve(async (req) => {
 
   try {
     const { chatHistory } = await req.json();
-
-    // AssistantId is set in code, but you can expose via frontend if needed later.
     const assistantId = "asst_QdGLwLL2mn8p46MZ0xuryV3S";
 
-    // 1. Create a thread (with all the previous messages in chatHistory).
+    // 1. Create a thread with history
     const createThreadResp = await fetch("https://api.openai.com/v1/threads", {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${openAIApiKey}`,
         "Content-Type": "application/json",
+        "OpenAI-Beta": "assistants=v2",
       },
       body: JSON.stringify({
         messages: chatHistory.map(msg => ({
@@ -49,12 +47,13 @@ serve(async (req) => {
 
     const thread = await createThreadResp.json();
 
-    // 2. Create a run with the assistant on the thread
+    // 2. Create a run
     const runResp = await fetch(`https://api.openai.com/v1/threads/${thread.id}/runs`, {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${openAIApiKey}`,
         "Content-Type": "application/json",
+        "OpenAI-Beta": "assistants=v2",
       },
       body: JSON.stringify({
         assistant_id: assistantId,
@@ -85,6 +84,7 @@ serve(async (req) => {
         method: "GET",
         headers: {
           "Authorization": `Bearer ${openAIApiKey}`,
+          "OpenAI-Beta": "assistants=v2",
         },
       });
       const pollData = await pollResp.json();
@@ -95,6 +95,7 @@ serve(async (req) => {
           method: "GET",
           headers: {
             "Authorization": `Bearer ${openAIApiKey}`,
+            "OpenAI-Beta": "assistants=v2",
           },
         });
         const msgData = await msgResp.json();
