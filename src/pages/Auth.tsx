@@ -80,8 +80,8 @@ const Auth = () => {
           alt="Person using a laptop, relaxed"
           className="rounded-xl w-full max-w-xs mb-4 shadow-md animate-fade-in"
         />
-        {/* Show info icon/button ONLY in signup mode */}
-        {mode === "signup" && (
+        {/* Show info icon/button for the login page (demo users) */}
+        {mode === "login" && (
           <div className="flex justify-center mb-4">
             <button
               type="button"
