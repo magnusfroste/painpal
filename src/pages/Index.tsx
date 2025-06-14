@@ -8,7 +8,6 @@ import MigrainePreliminaryAnalysis from "@/components/MigrainePreliminaryAnalysi
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import AddToHomeScreenBanner from "@/components/AddToHomeScreenBanner";
-import BottomTabBar from "@/components/BottomTabBar";
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
 import { useIsMobile } from "@/hooks/use-mobile";
 import HomeTabs from "@/components/HomeTabs";
@@ -153,7 +152,6 @@ const Index = () => {
           <div className="py-10" />
         </div>
       </main>
-      {isMobile && <BottomTabBar />}
     </div>
   );
 };
