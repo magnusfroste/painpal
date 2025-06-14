@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import MigraineStepWizard from "@/components/MigraineStepWizard";
 import MigrainHistoryChart from "@/components/MigrainHistoryChart";
@@ -167,10 +166,6 @@ const Index = () => {
       <header className="w-full z-40 flex flex-col items-center pt-8 mb-3 py-[5px]">
         <div className="w-full max-w-[440px] backdrop-blur-xl bg-white/60 rounded-3xl shadow-xl py-1 mx-2 mb-3 border border-white/50 px-[8px]">
           <AINurseMascot variant={mascotProps.variant} message={mascotProps.message} />
-          {/* Main header message below mascot */}
-          <div className="text-center mt-2 text-base md:text-lg font-semibold text-blue-950 transition-all min-h-[44px]" aria-live="polite">
-            {TAB_HEADER_MAP[activeTab] || TAB_HEADER_MAP["track"]}
-          </div>
         </div>
       </header>
       <main className="flex-1 w-full flex flex-col items-center px-0 py-0 pb-24">
