@@ -147,23 +147,7 @@ const HomeTabs: React.FC<HomeTabsProps> = ({
       {/* Learn Tab */}
       <TabsContent value="learn" className={`${isMobile ? "mt-0 px-0 py-2" : "mt-0"} transition`}>
         <aside className="w-full flex flex-col items-center gap-3">
-          {/* PWA Info Box */}
-          <div className="w-full border border-blue-300 rounded-xl bg-blue-50/70 px-5 py-4 flex items-center gap-3 shadow animate-fade-in">
-            <img
-              src="/lovable-uploads/ios-icon-192.png"
-              alt="App icon"
-              className="w-10 h-10 rounded-xl shadow"
-            />
-            <div className="flex-1 text-sm leading-snug">
-              <div className="font-bold text-blue-900 mb-1">Install on your home screen!</div>
-              <div>
-                PainPal is a PWA app—add it to your iPhone or iPad home screen for a native feel.<br />
-                Just tap the <span className="inline-block px-1 align-middle"><img src="https://upload.wikimedia.org/wikipedia/commons/3/3e/Share_icon_iOS.png" className="inline w-4 h-4" alt="Share" /></span>
-                share icon, then “Add to Home Screen”.
-                <span className="block mt-1 text-xs text-gray-500">Works on iPhone and iPad with Safari.</span>
-              </div>
-            </div>
-          </div>
+          {/* PWA Info Box removed as requested */}
           <div className={`font-extrabold ${isMobile ? "text-base mb-0" : "text-lg mb-1"} text-purple-800`}>Learn more:</div>
           <div className={`w-full flex flex-row flex-wrap gap-2 justify-center`}>
             <InfoButton type="what" />
