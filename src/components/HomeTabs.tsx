@@ -42,8 +42,9 @@ const HomeTabs: React.FC<HomeTabsProps> = ({
       </TabsList>
       {/* Track Tab: Migraine Wizard */}
       <TabsContent value="track" className="mt-0">
-        <div className="rounded-[32px] bg-white/75 shadow-2xl border border-white/60 px-2 pt-4 pb-3 animate-fade-in">
-          <MigraineStepWizard onComplete={handleEntryAdd} />
+        {/* Only one card! */}
+        <MigraineStepWizard onComplete={handleEntryAdd}>
+          {/* Feedback messages (saving & celebrate) placed as children, so shown inside card */}
           {saving && (
             <div className="mt-3 text-base text-blue-500 text-center animate-pulse">
               Saving entry…
@@ -54,7 +55,7 @@ const HomeTabs: React.FC<HomeTabsProps> = ({
               🎉 Thanks! <br /> Collecting this data is super helpful!
             </div>
           )}
-        </div>
+        </MigraineStepWizard>
       </TabsContent>
       {/* Analysis Tab */}
       <TabsContent value="analysis" className="mt-0">
@@ -90,3 +91,4 @@ const HomeTabs: React.FC<HomeTabsProps> = ({
 };
 
 export default HomeTabs;
+

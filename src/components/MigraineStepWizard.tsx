@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, ReactNode } from "react";
 import AINurseMascot from "./AINurseMascot";
 
 const steps = [
@@ -43,8 +43,10 @@ const steps = [
 
 const MigraineStepWizard = ({
   onComplete,
+  children,
 }: {
   onComplete: (entry: any) => void;
+  children?: ReactNode; // allow slotting of feedback messages
 }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<any[]>([]);
@@ -71,9 +73,7 @@ const MigraineStepWizard = ({
   const { question, options } = steps[currentStep];
 
   return (
-    <div className="w-full max-w-md mx-auto p-4 rounded-2xl bg-white shadow-lg animate-fade-in 
-      sm:p-6
-      ">
+    <div className="w-full max-w-md mx-auto p-4 rounded-2xl bg-white shadow-lg animate-fade-in sm:p-6">
       <AINurseMascot variant={currentStep === 0 ? "normal" : "happy"} />
       <div>
         <div className="text-[1.25rem] sm:text-xl font-bold text-gray-800 mb-3 text-center">{question}</div>
@@ -98,9 +98,12 @@ const MigraineStepWizard = ({
             />
           ))}
         </div>
+        {/* Feedback messages (saving/celebrate) slot */}
+        {children}
       </div>
     </div>
   );
 };
 
 export default MigraineStepWizard;
+
