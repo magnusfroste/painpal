@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import MigraineStepWizard from "@/components/MigraineStepWizard";
 import MigrainHistoryChart from "@/components/MigrainHistoryChart";
@@ -143,6 +144,17 @@ const Index = () => {
     setTimeout(() => setWizardOpen(true), 2000); // allow quick re-add
   };
 
+  // Automatically switch to Insights ("analysis" tab) after celebrate feedback
+  useEffect(() => {
+    if (celebrate) {
+      // Wait about 1 second so the user sees the feedback, then switch
+      const timer = setTimeout(() => {
+        setActiveTab("analysis");
+      }, 1100);
+      return () => clearTimeout(timer);
+    }
+  }, [celebrate]);
+
   // Mascot logic
   const mascotProps =
     celebrate
@@ -180,6 +192,8 @@ const Index = () => {
             setWizardOpen={setWizardOpen}
             wizardOpen={wizardOpen}
             onTabChange={setActiveTab}
+            // NEW: activeTab prop forces the tab shown, changes with setActiveTab
+            activeTab={activeTab}
           />
           <div className="py-[10px]" />
         </div>

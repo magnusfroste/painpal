@@ -35,7 +35,7 @@ const TAB_LABELS = {
   history: "History",
 };
 
-const HomeTabs: React.FC<HomeTabsProps> = ({
+const HomeTabs: React.FC<HomeTabsProps & { activeTab?: string }> = ({
   history,
   loading,
   saving,
@@ -44,13 +44,22 @@ const HomeTabs: React.FC<HomeTabsProps> = ({
   isMobile = false,
   setWizardOpen,
   wizardOpen,
-  onTabChange, // NEW
+  onTabChange,
+  activeTab: controlledActiveTab, // NEW
 }) => {
   // Analysis tab available only if user has entries
   const hasHistory = history.length > 0;
   const [activeTab, setActiveTab] = React.useState("track");
 
-  // NEW: When tab changes, also notify parent
+  // Sync with parent (Index) if given as a prop
+  React.useEffect(() => {
+    if (controlledActiveTab && controlledActiveTab !== activeTab) {
+      setActiveTab(controlledActiveTab);
+    }
+    // eslint-disable-next-line
+  }, [controlledActiveTab]);
+
+  // When tab changes, notify parent
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
     if (onTabChange) onTabChange(tab);
@@ -66,6 +75,7 @@ const HomeTabs: React.FC<HomeTabsProps> = ({
 
   return (
     <Tabs
+      value={activeTab}
       defaultValue="track"
       className={`w-full`}
       onValueChange={handleTabChange}
