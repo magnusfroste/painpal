@@ -57,7 +57,7 @@ const MigrainHistoryChart = ({ history }: { history: any[] }) => {
   return (
     <div className="w-full max-w-2xl mx-auto mb-8 mt-2 p-6 bg-white shadow-md rounded-2xl animate-fade-in">
       <div className="font-semibold text-lg mb-3 text-center text-blue-700">
-        My Headache History (Bar = How Long)
+        My Headache History
       </div>
       <ResponsiveContainer width="100%" height={180}>
         <BarChart data={chartData}>
