@@ -5,9 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Info } from "lucide-react";
 import AddToHomeScreenInfoPopup from "@/components/AddToHomeScreenInfoPopup";
 
-// You can use a suitable royalty-free image here (replace the src if needed)
-const HERO_IMAGE =
-  "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80"; // smiling mother and daughter drinking water
+// Comment out the HERO_IMAGE since we're using a video now
+// const HERO_IMAGE =
+//   "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80"; // smiling mother and daughter drinking water
 
 const DEMO_EMAIL = "demo@painpal.com";
 const DEMO_PASSWORD = "123456";
@@ -75,10 +75,13 @@ const Auth = () => {
     <div className="min-h-screen bg-gradient-to-b from-purple-100 via-blue-50 to-pink-100 flex flex-col items-center justify-center py-10 px-2">
       <div className="mx-auto flex flex-col items-center rounded-3xl shadow-2xl bg-white/95 border border-white/60 w-full max-w-md px-7 py-10">
         {VALUE_PROP}
-        <img
-          src={HERO_IMAGE}
-          alt="Person using a laptop, relaxed"
+        <video
+          src="/yourvideo.mp4"
           className="rounded-xl w-full max-w-xs mb-4 shadow-md animate-fade-in"
+          autoPlay
+          loop
+          muted
+          playsInline
         />
         {/* Show info icon/button for the login page (demo users) */}
         {mode === "login" && (
