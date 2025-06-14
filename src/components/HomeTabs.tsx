@@ -1,4 +1,3 @@
-
 import React from "react";
 import MigraineStepWizard from "@/components/MigraineStepWizard";
 import MigrainePreliminaryAnalysis from "@/components/MigrainePreliminaryAnalysis";
@@ -42,9 +41,7 @@ const HomeTabs: React.FC<HomeTabsProps> = ({
       </TabsList>
       {/* Track Tab: Migraine Wizard */}
       <TabsContent value="track" className="mt-0">
-        {/* Only one card! */}
         <MigraineStepWizard onComplete={handleEntryAdd}>
-          {/* Feedback messages (saving & celebrate) placed as children, so shown inside card */}
           {saving && (
             <div className="mt-3 text-base text-blue-500 text-center animate-pulse">
               Saving entry…
@@ -62,9 +59,7 @@ const HomeTabs: React.FC<HomeTabsProps> = ({
         {loading ? (
           <div className="mb-6 text-sm text-blue-500 text-center">Loading your headache history…</div>
         ) : (
-          <div className="rounded-3xl bg-white/80 shadow-xl p-4 animate-fade-in min-h-[180px]">
-            <MigrainePreliminaryAnalysis history={history} />
-          </div>
+          <MigrainePreliminaryAnalysis history={history} />
         )}
       </TabsContent>
       {/* Learn Tab */}
@@ -91,4 +86,3 @@ const HomeTabs: React.FC<HomeTabsProps> = ({
 };
 
 export default HomeTabs;
-
