@@ -1,0 +1,22 @@
+
+{
+  "name": "PainPal",
+  "short_name": "PainPal",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f5f6fd",
+  "theme_color": "#97baf7",
+  "description": "Track migraines and headaches for kids.",
+  "icons": [
+    {
+      "src": "/lovable-uploads/ios-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/lovable-uploads/ios-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

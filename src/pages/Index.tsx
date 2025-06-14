@@ -7,6 +7,7 @@ import AINurseMascot from "@/components/AINurseMascot";
 import MigrainePreliminaryAnalysis from "@/components/MigrainePreliminaryAnalysis";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
+import AddToHomeScreenBanner from "@/components/AddToHomeScreenBanner";
 
 // Toast-like component (quick inline for now)
 const ErrorToast = ({ message, onClose }: { message: string; onClose: () => void }) => (
@@ -99,7 +100,10 @@ const Index = () => {
   const hasHistory = history.length > 0;
 
   return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-start bg-gradient-to-b from-blue-200 via-purple-100 to-pink-100 relative font-sans overflow-x-hidden">
+    <div className="min-h-screen w-full flex flex-col items-center justify-start bg-gradient-to-b from-blue-200 via-purple-100 to-pink-100 relative font-sans overflow-x-hidden
+      sm:pt-safe sm:pb-safe
+      ">
+      <AddToHomeScreenBanner />
       {saveError && (
         <ErrorToast
           message={saveError}
