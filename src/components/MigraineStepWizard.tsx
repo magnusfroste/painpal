@@ -1,4 +1,3 @@
-
 import React, { useState, ReactNode } from "react";
 import AINurseMascot from "./AINurseMascot";
 
@@ -74,7 +73,6 @@ const MigraineStepWizard = ({
 
   return (
     <div className="w-full max-w-md mx-auto p-4 rounded-2xl bg-white shadow-lg animate-fade-in sm:p-6">
-      <AINurseMascot variant={currentStep === 0 ? "normal" : "happy"} />
       <div>
         <div className="text-[1.25rem] sm:text-xl font-bold text-gray-800 mb-3 text-center">{question}</div>
         <div className="grid grid-cols-2 gap-4">
@@ -106,4 +104,3 @@ const MigraineStepWizard = ({
 };
 
 export default MigraineStepWizard;
-
