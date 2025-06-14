@@ -7,6 +7,7 @@ import InfoButton from "@/components/InfoButton";
 import AINurseMascot from "@/components/AINurseMascot";
 import MigrainePreliminaryAnalysis from "@/components/MigrainePreliminaryAnalysis";
 import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 
 // Toast-like component (quick inline for now)
 const ErrorToast = ({ message, onClose }: { message: string; onClose: () => void }) => (
@@ -21,52 +22,68 @@ const Index = () => {
   const [loading, setLoading] = useState(true);
   const [celebrate, setCelebrate] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const navigate = useNavigate();
+
+  // Check user, redirect if not logged in
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session?.user) navigate("/auth");
+    });
+  }, [navigate]);
 
   // Load migraine entries from Supabase for the current user
   useEffect(() => {
     async function fetchEntries() {
       setLoading(true);
-      // If there's no real user_id, fetch nothing (inform user below)
       try {
-        const { data, error } = await supabase
-          .from("migraine_entries")
-          .select("*")
-          .order("timestamp", { ascending: true });
-        if (data) setHistory(data);
+        // Get user
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.user) {
+          setHistory([]); // Not authenticated
+        } else {
+          const { data, error } = await supabase
+            .from("migraine_entries")
+            .select("*")
+            .eq("user_id", session.user.id)
+            .order("timestamp", { ascending: true });
+          if (error) {
+            setSaveError("Unable to load your migraine history.");
+            setHistory([]);
+          } else if (data) setHistory(data);
+        }
       } catch (e) {
-        // Do nothing for now
+        setSaveError("Something went wrong loading your history.");
+        setHistory([]);
       }
       setLoading(false);
     }
     fetchEntries();
-    // Optionally listen for real-time changes here if desired
+    // Optionally subscribe to changes here for realtime if you want
   }, []);
 
   // Add entry to Supabase
   const handleEntryAdd = async (entry: any) => {
-    // You must log in for headaches to be saved!
-    const NO_AUTH_EXPLANATION =
-      "Headache entries can only be saved if you are logged in. Please enable authentication for real saving!";
-    // Instead of using 'anon-user' (not a valid UUID), check if user id is available
-    // Here, we just simulate so the wizard resets, but give the correct error.
-    setSaveError(NO_AUTH_EXPLANATION);
-    // Optionally set celebrate to false if you want, or skip it
-
-    // The following code will not insert to DB, since RLS and table require a UUID. Uncomment when auth is live.
-    /*
-    const insert = { ...entry, user_id: userIdFromSession }; // Replace with actual user id
-    const { data, error } = await supabase
-      .from("migraine_entries")
-      .insert([insert])
-      .select();
-    if (data && !error) {
-      setHistory([...history, ...data]);
-      setCelebrate(true);
-      setTimeout(() => setCelebrate(false), 2400);
-    } else if (error) {
-      setSaveError(error.message);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) {
+        setSaveError("You must be logged in to save headache entries.");
+        return;
+      }
+      const insert = { ...entry, user_id: session.user.id };
+      const { data, error } = await supabase
+        .from("migraine_entries")
+        .insert([insert])
+        .select();
+      if (data && !error) {
+        setHistory([...history, ...data]);
+        setCelebrate(true);
+        setTimeout(() => setCelebrate(false), 2400);
+      } else if (error) {
+        setSaveError(error.message);
+      }
+    } catch (err: any) {
+      setSaveError("Could not save entry. Try refreshing the page.");
     }
-    */
   };
 
   // Decide if the user is new or returning (has entries)
@@ -90,6 +107,14 @@ const Index = () => {
                 : "normal"
             }
           />
+        </div>
+        <div className="mt-2">
+          <button
+            onClick={() => navigate("/auth")}
+            className="px-4 py-2 text-sm rounded-full bg-pink-200 text-pink-900 font-bold hover:bg-pink-300 transition hover-scale shadow inline-block"
+          >
+            Switch User / Log Out
+          </button>
         </div>
       </header>
 
