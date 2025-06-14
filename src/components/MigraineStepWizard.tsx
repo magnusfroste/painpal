@@ -1,3 +1,4 @@
+
 import React, { useState, ReactNode } from "react";
 import AINurseMascot from "./AINurseMascot";
 
@@ -45,20 +46,21 @@ const MigraineStepWizard = ({
   children,
 }: {
   onComplete: (entry: any) => void;
-  children?: ReactNode; // allow slotting of feedback messages
+  children?: ReactNode;
 }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<any[]>([]);
+  const [disabled, setDisabled] = useState(false);
 
   const handleOptionClick = (option: any) => {
+    if (disabled) return;
     const nextAnswers = [...answers, option.value];
     if (currentStep < steps.length - 1) {
       setAnswers(nextAnswers);
       setCurrentStep(currentStep + 1);
     } else {
-      // All done!
-      setAnswers([]);
-      setCurrentStep(0);
+      // All done! Disable buttons immediately
+      setDisabled(true);
       onComplete({
         where: nextAnswers[0],
         amount: nextAnswers[1],
@@ -66,6 +68,12 @@ const MigraineStepWizard = ({
         cause: nextAnswers[3],
         timestamp: new Date().toISOString(),
       });
+      // Reset after thank you
+      setTimeout(() => {
+        setAnswers([]);
+        setCurrentStep(0);
+        setDisabled(false);
+      }, 1100); // same as feedback/celebrate duration in Index.tsx
     }
   };
 
@@ -75,12 +83,16 @@ const MigraineStepWizard = ({
     <div className="w-full max-w-md mx-auto p-4 rounded-2xl bg-white shadow-lg animate-fade-in sm:p-6">
       <div>
         <div className="text-[1.25rem] sm:text-xl font-bold text-gray-800 mb-3 text-center">{question}</div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className={`grid grid-cols-2 gap-4 ${disabled ? "opacity-60 pointer-events-none select-none" : ""}`}>
           {options.map((option) => (
             <button
               key={option.value}
               onClick={() => handleOptionClick(option)}
-              className="flex flex-col items-center justify-center px-2 py-5 bg-blue-50 rounded-xl border-2 border-blue-100 hover:bg-blue-200 hover:scale-105 transition transform duration-150 shadow-md hover:shadow-lg text-base sm:text-lg font-bold focus:outline-none"
+              disabled={disabled}
+              className={
+                "flex flex-col items-center justify-center px-2 py-5 bg-blue-50 rounded-xl border-2 border-blue-100 hover:bg-blue-200 hover:scale-105 transition transform duration-150 shadow-md hover:shadow-lg text-base sm:text-lg font-bold focus:outline-none" +
+                (disabled ? " opacity-50 cursor-not-allowed pointer-events-none" : "")
+              }
               style={{ minHeight: 85, fontSize: "1.15rem", letterSpacing: "0.01em" }}
             >
               <span style={{ fontSize: 38 }}>{option.emoji}</span>
