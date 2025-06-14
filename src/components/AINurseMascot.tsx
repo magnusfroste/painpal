@@ -3,7 +3,7 @@ import React from "react";
 import { Info, Hand } from "lucide-react";
 
 const greetingMessages: Record<string, string> = {
-  normal: "Hi! I’m Nurse AI. Ready to help you track your headache 👋",
+  normal: "Hi! I’m PainPal. Ready to help you track your headache 👋",
   happy: "Great job! Let’s try to answer a few more questions!",
   celebrate: "Thank you for sharing! This info will help your doctor help you! 🌈",
   welcome: "Welcome back, superstar! I’m here to help whenever you need me 🤗"
@@ -36,3 +36,4 @@ const AINurseMascot = ({
 };
 
 export default AINurseMascot;
+
