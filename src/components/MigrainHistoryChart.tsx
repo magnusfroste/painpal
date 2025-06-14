@@ -1,4 +1,3 @@
-
 import React from "react";
 import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer } from "recharts";
 
@@ -109,7 +108,7 @@ const MigrainHistoryChart = ({ history }: { history: any[] }) => {
           >
             <span style={{ fontSize: 24 }}>{entry.emoji}</span>
             <span className="text-xs text-blue-500">{entry.where}</span>
-            <span className="text-[11px] text-gray-500">{entry.lengthLabel}</span>
+            {/* Removed lengthLabel from below each entry */}
           </div>
         ))}
       </div>
