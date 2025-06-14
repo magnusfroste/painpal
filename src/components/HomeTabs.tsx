@@ -1,4 +1,3 @@
-
 import React from "react";
 import MigraineStepWizard from "@/components/MigraineStepWizard";
 import MigrainePreliminaryAnalysis from "@/components/MigrainePreliminaryAnalysis";
@@ -151,9 +150,7 @@ const HomeTabs: React.FC<HomeTabsProps> = ({
       </TabsContent>
       {/* History Tab */}
       <TabsContent value="history" className={`${isMobile ? "mt-0 px-0 py-2 pb-8" : "mt-0 pb-16"} transition`}>
-        <Card className="w-full rounded-2xl shadow-sm bg-white/80 px-0 py-3 mt-2 sm:mt-3 flex flex-col items-center gap-1">
-          <MigrainHistoryChart history={history} />
-        </Card>
+        <MigrainHistoryChart history={history} />
         <div className="flex justify-center mt-3 w-full">
           <ExportDataButton history={history} />
         </div>
