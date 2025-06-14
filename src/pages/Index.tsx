@@ -8,22 +8,33 @@ import AINurseMascot from "@/components/AINurseMascot";
 import MigrainePreliminaryAnalysis from "@/components/MigrainePreliminaryAnalysis";
 import { supabase } from "@/integrations/supabase/client";
 
+// Toast-like component (quick inline for now)
+const ErrorToast = ({ message, onClose }: { message: string; onClose: () => void }) => (
+  <div className="fixed top-6 left-1/2 z-50 -translate-x-1/2 bg-red-600 text-white px-6 py-3 rounded-full shadow-lg flex items-center gap-4 font-bold">
+    <span>⚠️ {message}</span>
+    <button onClick={onClose} className="ml-4 underline text-white">Dismiss</button>
+  </div>
+);
+
 const Index = () => {
   const [history, setHistory] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [celebrate, setCelebrate] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   // Load migraine entries from Supabase for the current user
   useEffect(() => {
     async function fetchEntries() {
       setLoading(true);
-      // TODO: Replace anon user with real user id once auth is enabled
-      const { data, error } = await supabase
-        .from("migraine_entries")
-        .select("*")
-        .order("timestamp", { ascending: true });
-      if (data) {
-        setHistory(data);
+      // If there's no real user_id, fetch nothing (inform user below)
+      try {
+        const { data, error } = await supabase
+          .from("migraine_entries")
+          .select("*")
+          .order("timestamp", { ascending: true });
+        if (data) setHistory(data);
+      } catch (e) {
+        // Do nothing for now
       }
       setLoading(false);
     }
@@ -33,8 +44,17 @@ const Index = () => {
 
   // Add entry to Supabase
   const handleEntryAdd = async (entry: any) => {
-    // TODO: Add user_id automatically when auth is enabled
-    const insert = { ...entry, user_id: "anon-user" }; // Placeholder until auth
+    // You must log in for headaches to be saved!
+    const NO_AUTH_EXPLANATION =
+      "Headache entries can only be saved if you are logged in. Please enable authentication for real saving!";
+    // Instead of using 'anon-user' (not a valid UUID), check if user id is available
+    // Here, we just simulate so the wizard resets, but give the correct error.
+    setSaveError(NO_AUTH_EXPLANATION);
+    // Optionally set celebrate to false if you want, or skip it
+
+    // The following code will not insert to DB, since RLS and table require a UUID. Uncomment when auth is live.
+    /*
+    const insert = { ...entry, user_id: userIdFromSession }; // Replace with actual user id
     const { data, error } = await supabase
       .from("migraine_entries")
       .insert([insert])
@@ -43,8 +63,10 @@ const Index = () => {
       setHistory([...history, ...data]);
       setCelebrate(true);
       setTimeout(() => setCelebrate(false), 2400);
+    } else if (error) {
+      setSaveError(error.message);
     }
-    // Optionally, toast on error
+    */
   };
 
   // Decide if the user is new or returning (has entries)
@@ -52,6 +74,12 @@ const Index = () => {
 
   return (
     <div className="min-h-screen w-full flex flex-col items-center justify-start bg-gradient-to-b from-blue-200 via-purple-100 to-pink-100 relative font-sans overflow-x-hidden">
+      {saveError && (
+        <ErrorToast
+          message={saveError}
+          onClose={() => setSaveError(null)}
+        />
+      )}
       {/* "Apple style" blurred top bar */}
       <header className="w-full z-40 flex flex-col items-center pt-8 mb-3">
         <div className="w-full max-w-[440px] backdrop-blur-xl bg-white/60 rounded-3xl shadow-xl px-4 py-1 mx-2 mb-3 border border-white/50">
@@ -106,7 +134,6 @@ const Index = () => {
           )}
         </div>
       </main>
-      {/* Footer removed for simpler, mobile-friendly scrolling */}
     </div>
   );
 };
