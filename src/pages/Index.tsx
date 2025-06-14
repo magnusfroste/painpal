@@ -6,6 +6,7 @@ import ExportDataButton from "@/components/ExportDataButton";
 import InfoButton from "@/components/InfoButton";
 import AINurseMascot from "@/components/AINurseMascot";
 
+// Mobile app look and feel
 const Index = () => {
   const [history, setHistory] = useState<any[]>([]);
   const [celebrate, setCelebrate] = useState(false);
@@ -17,14 +18,14 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100 flex flex-col justify-start items-center pb-24 animate-fade-in">
-      <header className="pt-2 mb-2 mt-6">
+    <div className="min-h-screen w-full flex flex-col items-center justify-between bg-gradient-to-b from-blue-200 via-purple-100 to-pink-100 relative font-sans">
+      <header className="w-full flex flex-col items-center pt-6 mb-2">
         <AINurseMascot variant={celebrate ? "celebrate" : "normal"} />
       </header>
 
-      <div className="w-full flex flex-col-reverse lg:flex-row gap-6 max-w-6xl">
-        <main className="flex-1 flex flex-col gap-4 items-center">
-          <section className="mb-2">
+      <main className="flex-1 w-full flex flex-col items-center px-2 py-0">
+        <div className="w-full max-w-[430px] flex flex-col items-stretch flex-1">
+          <section className="mb-2 w-full">
             <MigraineStepWizard onComplete={handleEntryAdd} />
             {celebrate && (
               <div className="mt-3 text-xl font-bold text-green-600 animate-bounce text-center">
@@ -32,19 +33,30 @@ const Index = () => {
               </div>
             )}
           </section>
+          {/* Info Buttons */}
+          <aside className="mt-4 mb-2 w-full flex flex-col items-center gap-2">
+            <div className="text-lg font-extrabold text-purple-800 mb-1">Learn more:</div>
+            <div className="w-full flex flex-row flex-wrap gap-2 justify-center">
+              <InfoButton type="what" />
+              <InfoButton type="tips" />
+              <InfoButton type="parents" />
+              <InfoButton type="safe" />
+            </div>
+          </aside>
+          <div className="pb-32" />
+        </div>
+      </main>
+
+      {/* Sticky bottom actions */}
+      <footer className="fixed bottom-0 left-0 w-full z-30 flex flex-col items-center bg-gradient-to-t from-white/70 to-transparent pb-6 pt-3 px-2">
+        <div className="w-full max-w-[430px] mx-auto flex flex-col items-center gap-2">
           <ExportDataButton history={history} />
-          <MigrainHistoryChart history={history} />
-        </main>
-        <aside className="flex flex-col items-center gap-3 mb-6 lg:mb-0">
-          <div className="text-lg font-bold text-purple-800 mb-1">Learn more:</div>
-          <div className="flex flex-row flex-wrap gap-3">
-            <InfoButton type="what" />
-            <InfoButton type="tips" />
-            <InfoButton type="parents" />
-            <InfoButton type="safe" />
+          {/* History chart stays mobile friendly */}
+          <div className="w-full max-w-[420px] rounded-2xl bg-white/80 py-2 px-1 shadow-sm">
+            <MigrainHistoryChart history={history} />
           </div>
-        </aside>
-      </div>
+        </div>
+      </footer>
     </div>
   );
 };
