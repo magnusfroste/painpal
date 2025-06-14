@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import MigraineStepWizard from "@/components/MigraineStepWizard";
 import MigrainHistoryChart from "@/components/MigrainHistoryChart";
@@ -134,7 +133,6 @@ const Index = () => {
             <div className="rounded-[32px] bg-white/75 shadow-2xl border border-white/60 px-2 pt-4 pb-3">
               <MigraineStepWizard
                 onComplete={handleEntryAdd}
-                disableAll={saving}
               />
               {saving && (
                 <div className="mt-3 text-base text-blue-500 text-center animate-pulse">
