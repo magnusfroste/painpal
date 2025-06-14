@@ -114,16 +114,22 @@ const MigrainePreliminaryAnalysis = ({ history }: { history: any[] }) => {
     ? "No headaches logged yet. When you do, you'll see a friendly analysis here!"
     : parsed
       ? `
-          <div>
-            <div class="mb-2">
-              <b>Analysis:</b><br/>
-              <span>${formatField(parsed.analysis)}</span>
-            </div>
-            <div>
-              <b>Recommendations:</b><br/>
-              <span>${formatField(parsed.recommendations)}</span>
-            </div>
+        <div>
+          <div class="mb-2">
+            <b>Analysis:</b><br/>
+            <span>${formatField(parsed.analysis)}</span>
           </div>
+          <div class="mb-2">
+            <b>Recommendations:</b><br/>
+            <span>${formatField(parsed.recommendations)}</span>
+          </div>
+          ${parsed.Datapoints
+            ? `<div class="mb-2">
+                <b>Datapoints:</b><br/>
+                <span>${formatField(parsed.Datapoints)}</span>
+              </div>`
+            : ""}
+        </div>
         `
       : analysis
         ? (typeof analysis === "string" ? analysis.replace(/\n/g, "<br/>") : String(analysis))
