@@ -6,6 +6,7 @@ import InfoButton from "@/components/InfoButton";
 import ExportDataButton from "@/components/ExportDataButton";
 import MigrainHistoryChart from "@/components/MigrainHistoryChart";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Card } from "@/components/ui/card";
 import { Activity, BarChart2, BookOpen, Clock } from "lucide-react";
 
 // Typing for props from Index.tsx
@@ -150,13 +151,12 @@ const HomeTabs: React.FC<HomeTabsProps> = ({
       </TabsContent>
       {/* History Tab */}
       <TabsContent value="history" className={`${isMobile ? "mt-0 px-0 py-2 pb-16" : "mt-0 pb-24"} transition`}>
-        <div className="w-full rounded-2xl bg-white/80 py-2 px-2 shadow-sm mt-2 sm:mt-3">
+        <Card className="w-full rounded-2xl shadow-sm bg-white/80 p-2 mt-2 sm:mt-3 flex flex-col items-center gap-2">
           <MigrainHistoryChart history={history} />
-        </div>
-        {/* Place ExportDataButton directly under the history chart */}
-        <div className="w-full flex justify-center mt-2">
-          <ExportDataButton history={history} />
-        </div>
+          <div className="w-full flex justify-center">
+            <ExportDataButton history={history} />
+          </div>
+        </Card>
       </TabsContent>
     </Tabs>
   );
