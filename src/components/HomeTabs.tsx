@@ -1,4 +1,3 @@
-
 import React from "react";
 import MigraineStepWizard from "@/components/MigraineStepWizard";
 import MigrainePreliminaryAnalysis from "@/components/MigrainePreliminaryAnalysis";
@@ -43,7 +42,7 @@ const HomeTabs: React.FC<HomeTabsProps> = ({
         <TabsTrigger value="track" className="flex-1 text-blue-700">Track</TabsTrigger>
         <TabsTrigger value="analysis" className="flex-1 text-purple-700" disabled={!hasHistory}>Analysis</TabsTrigger>
         <TabsTrigger value="learn" className="flex-1 text-pink-700">Learn</TabsTrigger>
-        <TabsTrigger value="history" className="flex-1 text-green-700">Export</TabsTrigger>
+        <TabsTrigger value="history" className="flex-1 text-green-700">History</TabsTrigger>
       </TabsList>
       {/* Track Tab: Migraine Wizard */}
       <TabsContent value="track" className="mt-0">
@@ -96,4 +95,3 @@ const HomeTabs: React.FC<HomeTabsProps> = ({
 };
 
 export default HomeTabs;
-
