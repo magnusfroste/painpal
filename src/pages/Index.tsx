@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import MigraineStepWizard from "@/components/MigraineStepWizard";
 import MigrainHistoryChart from "@/components/MigrainHistoryChart";
@@ -8,8 +9,11 @@ import MigrainePreliminaryAnalysis from "@/components/MigrainePreliminaryAnalysi
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import AddToHomeScreenBanner from "@/components/AddToHomeScreenBanner";
+import BottomTabBar from "@/components/BottomTabBar";
+import { Drawer, DrawerContent } from "@/components/ui/drawer";
+import { useIsMobile } from "@/hooks/use-mobile";
 
-// Toast-like component (quick inline for now)
+/** Toast-like component (quick inline for now) */
 const ErrorToast = ({ message, onClose }: { message: string; onClose: () => void }) => (
   <div className="fixed top-6 left-1/2 z-50 -translate-x-1/2 bg-red-600 text-white px-6 py-3 rounded-full shadow-lg flex items-center gap-4 font-bold">
     <span>⚠️ {message}</span>
@@ -23,7 +27,9 @@ const Index = () => {
   const [saving, setSaving] = useState(false); // Track saving state for UI feedback
   const [celebrate, setCelebrate] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [wizardOpen, setWizardOpen] = useState(true);
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
 
   // Check user, redirect if not logged in
   useEffect(() => {
@@ -94,6 +100,8 @@ const Index = () => {
       setSaveError("Could not save entry. Try refreshing the page.");
     }
     setSaving(false);
+    setWizardOpen(false);   // close drawer after saving (mobile)
+    setTimeout(() => setWizardOpen(true), 2000); // allow quick re-add
   };
 
   // Decide if the user is new or returning (has entries)
@@ -101,8 +109,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen w-full flex flex-col items-center justify-start bg-gradient-to-b from-blue-200 via-purple-100 to-pink-100 relative font-sans overflow-x-hidden
-      sm:pt-safe sm:pb-safe
-      ">
+      sm:pt-safe sm:pb-safe">
       <AddToHomeScreenBanner />
       {saveError && (
         <ErrorToast
@@ -131,24 +138,43 @@ const Index = () => {
         </div>
       </header>
 
-      <main className="flex-1 w-full flex flex-col items-center px-0 py-0">
+      <main className="flex-1 w-full flex flex-col items-center px-0 py-0 pb-24">
         <div className="w-full max-w-[440px] flex flex-col items-stretch flex-1 mx-auto">
           <section className="w-full mb-4">
-            <div className="rounded-[32px] bg-white/75 shadow-2xl border border-white/60 px-2 pt-4 pb-3">
-              <MigraineStepWizard
-                onComplete={handleEntryAdd}
-              />
-              {saving && (
-                <div className="mt-3 text-base text-blue-500 text-center animate-pulse">
-                  Saving entry…
-                </div>
-              )}
-              {celebrate && (
-                <div className="mt-3 text-xl font-bold text-green-600 animate-bounce text-center">
-                  🎉 Thanks! <br /> Collecting this data is super helpful!
-                </div>
-              )}
-            </div>
+            {/* Mobile version: Migraine Wizard as a Drawer */}
+            {isMobile ? (
+              <Drawer open={wizardOpen} onOpenChange={setWizardOpen}>
+                <DrawerContent>
+                  <div className="rounded-t-3xl bg-white/90 shadow-2xl border border-blue-200 mx-auto w-full p-0 pb-3 animate-fade-in">
+                    <MigraineStepWizard onComplete={handleEntryAdd} />
+                    {saving && (
+                      <div className="mt-3 text-base text-blue-500 text-center animate-pulse">
+                        Saving entry…
+                      </div>
+                    )}
+                    {celebrate && (
+                      <div className="mt-3 text-xl font-bold text-green-600 animate-bounce text-center">
+                        🎉 Thanks! <br /> Collecting this data is super helpful!
+                      </div>
+                    )}
+                  </div>
+                </DrawerContent>
+              </Drawer>
+            ) : (
+              <div className="rounded-[32px] bg-white/75 shadow-2xl border border-white/60 px-2 pt-4 pb-3 animate-fade-in">
+                <MigraineStepWizard onComplete={handleEntryAdd} />
+                {saving && (
+                  <div className="mt-3 text-base text-blue-500 text-center animate-pulse">
+                    Saving entry…
+                  </div>
+                )}
+                {celebrate && (
+                  <div className="mt-3 text-xl font-bold text-green-600 animate-bounce text-center">
+                    🎉 Thanks! <br /> Collecting this data is super helpful!
+                  </div>
+                )}
+              </div>
+            )}
           </section>
           {/* Loading state for Supabase fetch */}
           {loading ? (
@@ -178,6 +204,8 @@ const Index = () => {
           )}
         </div>
       </main>
+      {/* Bottom Tab Bar: visible only on mobile, overlays content edge */}
+      {isMobile && <BottomTabBar />}
     </div>
   );
 };

@@ -71,19 +71,21 @@ const MigraineStepWizard = ({
   const { question, options } = steps[currentStep];
 
   return (
-    <div className="w-full max-w-md mx-auto p-4 rounded-2xl bg-white shadow-lg animate-fade-in">
+    <div className="w-full max-w-md mx-auto p-4 rounded-2xl bg-white shadow-lg animate-fade-in 
+      sm:p-6
+      ">
       <AINurseMascot variant={currentStep === 0 ? "normal" : "happy"} />
       <div>
-        <div className="text-xl font-bold text-gray-800 mb-3 text-center">{question}</div>
+        <div className="text-[1.25rem] sm:text-xl font-bold text-gray-800 mb-3 text-center">{question}</div>
         <div className="grid grid-cols-2 gap-4">
           {options.map((option) => (
             <button
               key={option.value}
               onClick={() => handleOptionClick(option)}
-              className="flex flex-col items-center justify-center p-4 bg-blue-50 rounded-xl border-2 border-blue-100 hover:bg-blue-200 hover:scale-105 transition transform duration-150 shadow-md hover:shadow-lg text-lg font-bold focus:outline-none"
-              style={{ minHeight: 85 }}
+              className="flex flex-col items-center justify-center px-2 py-5 bg-blue-50 rounded-xl border-2 border-blue-100 hover:bg-blue-200 hover:scale-105 transition transform duration-150 shadow-md hover:shadow-lg text-base sm:text-lg font-bold focus:outline-none"
+              style={{ minHeight: 85, fontSize: "1.15rem", letterSpacing: "0.01em" }}
             >
-              <span style={{ fontSize: 36 }}>{option.emoji}</span>
+              <span style={{ fontSize: 38 }}>{option.emoji}</span>
               <span className="mt-2">{option.label}</span>
             </button>
           ))}
