@@ -30,9 +30,14 @@ const HomeTabs: React.FC<HomeTabsProps> = ({
 }) => {
   // Analysis tab available only if user has entries
   const hasHistory = history.length > 0;
+  const [activeTab, setActiveTab] = React.useState("track");
 
   return (
-    <Tabs defaultValue="track" className="w-full">
+    <Tabs
+      defaultValue="track"
+      className="w-full"
+      onValueChange={setActiveTab}
+    >
       <TabsList className="w-full justify-around bg-blue-50/80 rounded-2xl mb-4 px-0 py-2 shadow">
         <TabsTrigger value="track" className="flex-1 text-blue-700">Track</TabsTrigger>
         <TabsTrigger value="analysis" className="flex-1 text-purple-700" disabled={!hasHistory}>Analysis</TabsTrigger>
@@ -75,12 +80,23 @@ const HomeTabs: React.FC<HomeTabsProps> = ({
         </aside>
       </TabsContent>
       {/* Export/History Tab */}
-      <TabsContent value="history" className="mt-0">
-        <ExportDataButton history={history} />
+      <TabsContent value="history" className="mt-0 pb-24"> {/* Add bottom padding to avoid covered content */}
+        {/* Moved ExportDataButton to sticky bottom, so remove it from here */}
         <div className="w-full rounded-2xl bg-white/80 py-2 px-2 shadow-sm mt-3">
           <MigrainHistoryChart history={history} />
         </div>
+        {/* The sticky Export button is rendered below outside TabsContent when Export tab is active */}
       </TabsContent>
+      {/* Green Share button fixed to the bottom ONLY if Export tab is open */}
+      {activeTab === "history" && hasHistory && (
+        <div
+          className="fixed bottom-4 left-1/2 -translate-x-1/2 z-30 w-full max-w-[440px] px-4 flex justify-center pointer-events-none"
+        >
+          <div className="pointer-events-auto w-full flex justify-center">
+            <ExportDataButton history={history} />
+          </div>
+        </div>
+      )}
     </Tabs>
   );
 };
