@@ -106,6 +106,12 @@ const Index = () => {
   // Decide if the user is new or returning (has entries)
   const hasHistory = history.length > 0;
 
+  // Add this function to handle proper sign out
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    navigate("/auth", { replace: true });
+  };
+
   return (
     <div className="min-h-screen w-full flex flex-col items-center justify-start bg-gradient-to-b from-blue-200 via-purple-100 to-pink-100 relative font-sans overflow-x-hidden
       sm:pt-safe sm:pb-safe">
@@ -129,7 +135,7 @@ const Index = () => {
         </div>
         <div className="mt-2">
           <button
-            onClick={() => navigate("/auth")}
+            onClick={handleSignOut}
             className="px-4 py-2 text-sm rounded-full bg-pink-200 text-pink-900 font-bold hover:bg-pink-300 transition hover-scale shadow inline-block"
           >
             Switch User / Log Out
