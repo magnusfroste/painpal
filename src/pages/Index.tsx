@@ -20,7 +20,7 @@ const Index = () => {
   const hasHistory = history.length > 0;
 
   return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-between bg-gradient-to-b from-blue-200 via-purple-100 to-pink-100 relative font-sans overflow-x-hidden">
+    <div className="min-h-screen w-full flex flex-col items-center justify-start bg-gradient-to-b from-blue-200 via-purple-100 to-pink-100 relative font-sans overflow-x-hidden">
       {/* "Apple style" blurred top bar */}
       <header className="w-full z-40 flex flex-col items-center pt-8 mb-3">
         <div className="w-full max-w-[440px] backdrop-blur-xl bg-white/60 rounded-3xl shadow-xl px-4 py-1 mx-2 mb-3 border border-white/50">
@@ -56,21 +56,17 @@ const Index = () => {
               <InfoButton type="safe" />
             </div>
           </aside>
-          <div className="pb-32" />
-        </div>
-      </main>
-
-      {/* Sticky bottom actions, floating glass card */}
-      <footer className="fixed bottom-0 left-0 w-full z-30 flex flex-col items-center pointer-events-none">
-        <div className="w-full max-w-[440px] mx-auto px-2">
-          <div className="rounded-3xl backdrop-blur-2xl bg-white/80 py-4 px-2 shadow-2xl border border-white/70 pointer-events-auto flex flex-col gap-3">
+          {/* Export and History moved from footer to main scrollable content */}
+          <div className="mt-4 flex flex-col gap-4">
             <ExportDataButton history={history} />
             <div className="w-full rounded-2xl bg-white/80 py-2 px-2 shadow-sm">
               <MigrainHistoryChart history={history} />
             </div>
           </div>
+          <div className="py-10" />
         </div>
-      </footer>
+      </main>
+      {/* Footer removed for simpler, mobile-friendly scrolling */}
     </div>
   );
 };
