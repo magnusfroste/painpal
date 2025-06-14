@@ -40,7 +40,7 @@ const HomeTabs: React.FC<HomeTabsProps> = ({
     >
       <TabsList className="w-full justify-around bg-blue-50/80 rounded-2xl mb-4 px-0 py-2 shadow">
         <TabsTrigger value="track" className="flex-1 text-blue-700">Track</TabsTrigger>
-        <TabsTrigger value="analysis" className="flex-1 text-purple-700" disabled={!hasHistory}>Analysis</TabsTrigger>
+        <TabsTrigger value="analysis" className="flex-1 text-purple-700" disabled={!hasHistory}>Insights</TabsTrigger>
         <TabsTrigger value="learn" className="flex-1 text-pink-700">Learn</TabsTrigger>
         <TabsTrigger value="history" className="flex-1 text-green-700">History</TabsTrigger>
       </TabsList>
