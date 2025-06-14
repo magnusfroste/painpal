@@ -1,1 +1,5 @@
+
 project_id = "umjqoizuhfrxzjgrdvei"
+
+[functions.painpal-assistant]
+verify_jwt = false
