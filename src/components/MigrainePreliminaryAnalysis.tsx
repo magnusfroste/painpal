@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useAssistantAnalysis } from "@/hooks/useAssistantAnalysis";
 
@@ -73,6 +72,20 @@ const friendlyCommentary = (history: any[]) => {
   return lines.join("<br/>");
 };
 
+const formatField = (field: any) => {
+  if (typeof field === "string") {
+    return field.replace(/\n/g, "<br/>");
+  } else if (Array.isArray(field)) {
+    // If it's an array, join lines with <br/>
+    return field.map((line) =>
+      typeof line === "string" ? line : JSON.stringify(line)
+    ).join("<br/>");
+  } else if (field !== undefined && field !== null) {
+    return String(field);
+  }
+  return "";
+};
+
 const MigrainePreliminaryAnalysis = ({ history }: { history: any[] }) => {
   // Assistant connection: You can change the assistantId if needed!
   const assistantId = "asst_QdGLwLL2mn8p46MZ0xuryV3S";
@@ -100,21 +113,21 @@ const MigrainePreliminaryAnalysis = ({ history }: { history: any[] }) => {
   const commentaryHTML = !history.length
     ? "No headaches logged yet. When you do, you'll see a friendly analysis here!"
     : parsed
-        ? `
+      ? `
           <div>
             <div class="mb-2">
               <b>Analysis:</b><br/>
-              <span>${parsed.analysis ? parsed.analysis.replace(/\n/g, "<br/>") : ""}</span>
+              <span>${formatField(parsed.analysis)}</span>
             </div>
             <div>
               <b>Recommendations:</b><br/>
-              <span>${parsed.recommendations ? parsed.recommendations.replace(/\n/g, "<br/>") : ""}</span>
+              <span>${formatField(parsed.recommendations)}</span>
             </div>
           </div>
         `
-        : analysis
-          ? analysis.replace(/\n/g, "<br/>")
-          : friendlyCommentary(history);
+      : analysis
+        ? (typeof analysis === "string" ? analysis.replace(/\n/g, "<br/>") : String(analysis))
+        : friendlyCommentary(history);
 
   return (
     <section className="w-full mb-4">
