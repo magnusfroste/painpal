@@ -164,7 +164,7 @@ const HomeTabs: React.FC<HomeTabsProps & { activeTab?: string }> = ({
             <InfoButton type="parents" />
             <InfoButton type="safe" />
           </div>
-          <div className="w-full max-w-xs mt-2 bg-yellow-50 border border-yellow-200 rounded-2xl shadow p-4 text-yellow-900 text-base font-semibold flex flex-col items-start">
+          <div className="w-full max-w-2xl mt-2 bg-yellow-50 border border-yellow-200 rounded-2xl shadow p-4 text-yellow-900 text-base font-semibold flex flex-col items-start">
             <span className="block font-bold mb-1 text-yellow-800">Remember:</span>
             <span>
               Don’t forget to keep logging your headaches and tell your doctor all about them next time you visit. Your notes are super helpful to understand how you’re feeling!
