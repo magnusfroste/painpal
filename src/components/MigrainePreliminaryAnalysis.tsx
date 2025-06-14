@@ -1,5 +1,5 @@
-
 import React from "react";
+import { useAssistantAnalysis } from "@/hooks/useAssistantAnalysis";
 
 // Helper: simple frequency counting utility
 function countBy<T extends string>(arr: T[]): Record<T, number> {
@@ -72,15 +72,36 @@ const friendlyCommentary = (history: any[]) => {
   return lines.join("<br/>");
 };
 
-const MigrainePreliminaryAnalysis = ({ history }: { history: any[] }) => (
-  <section className="w-full mb-4">
-    <div className="rounded-2xl bg-blue-50/70 shadow-md border border-blue-100 px-4 py-4 flex flex-row items-start gap-3">
-      <span className="text-2xl select-none" aria-hidden>🔎</span>
-      <div className="flex-1 text-blue-900 text-base font-semibold leading-relaxed" 
-        dangerouslySetInnerHTML={{ __html: friendlyCommentary(history) }} 
-      />
-    </div>
-  </section>
-);
+const MigrainePreliminaryAnalysis = ({ history }: { history: any[] }) => {
+  // Assistant connection: You can change the assistantId if needed!
+  const assistantId = "asst_QdGLwLL2mn8p46MZ0xuryV3S";
+  const { analysis, loading, error } = useAssistantAnalysis({ history, assistantId });
+
+  const commentaryHTML = !history.length
+    ? "No headaches logged yet. When you do, you'll see a friendly analysis here!"
+    : analysis
+      ? analysis.replace(/\n/g, "<br/>")
+      : friendlyCommentary(history);
+
+  return (
+    <section className="w-full mb-4">
+      <div className="rounded-2xl bg-blue-50/70 shadow-md border border-blue-100 px-4 py-4 flex flex-row items-start gap-3">
+        <span className="text-2xl select-none" aria-hidden>🔎</span>
+        <div className="flex-1 text-blue-900 text-base font-semibold leading-relaxed">
+          {loading ? (
+            <span className="animate-pulse text-blue-600">PainPal is thinking...</span>
+          ) : (
+            <span
+              dangerouslySetInnerHTML={{ __html: commentaryHTML }}
+            />
+          )}
+          {error && (
+            <div className="mt-2 text-sm text-red-500">{error}</div>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+};
 
 export default MigrainePreliminaryAnalysis;
