@@ -128,18 +128,10 @@ const Index = () => {
           <AINurseMascot
             variant={
               celebrate ? "celebrate"
-                : hasHistory ? "welcome"
+                : history.length > 0 ? "welcome"
                 : "normal"
             }
           />
-        </div>
-        <div className="mt-2">
-          <button
-            onClick={handleSignOut}
-            className="px-4 py-2 text-sm rounded-full bg-pink-200 text-pink-900 font-bold hover:bg-pink-300 transition hover-scale shadow inline-block"
-          >
-            Switch User / Log Out
-          </button>
         </div>
       </header>
 
@@ -158,6 +150,17 @@ const Index = () => {
           <div className="py-10" />
         </div>
       </main>
+
+      {/* Sticky Switch User / Log Out button at bottom center */}
+      <div className="fixed bottom-4 left-0 right-0 z-40 flex justify-center pointer-events-none w-full">
+        <button
+          onClick={handleSignOut}
+          className="pointer-events-auto px-6 py-2 text-sm rounded-full bg-pink-200 text-pink-900 font-bold hover:bg-pink-300 transition hover-scale shadow inline-block"
+          style={{ maxWidth: 440, width: "90%" }}
+        >
+          Switch User / Log Out
+        </button>
+      </div>
     </div>
   );
 };
