@@ -3,11 +3,14 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const openAIApiKey = Deno.env.get("OPENAI_API_KEY");
-
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+async function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -17,47 +20,109 @@ serve(async (req) => {
   try {
     const { chatHistory } = await req.json();
 
-    const systemPrompt =
-      "You're PainPal, a friendly AI that helps interpret a child's headache log in very simple, positive sentences. Summarize the recent entries (max 4–5 sentences), encourage self-care, and highlight any common patterns if you see them, using cheerful language suitable for a 10 year-old. Emoji are nice!";
+    // AssistantId is set in code, but you can expose via frontend if needed later.
+    const assistantId = "asst_QdGLwLL2mn8p46MZ0xuryV3S";
 
-    const messages = [
-      { role: "system", content: systemPrompt },
-      ...chatHistory
-    ];
-
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    // 1. Create a thread (with all the previous messages in chatHistory).
+    const createThreadResp = await fetch("https://api.openai.com/v1/threads", {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${openAIApiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "gpt-4-1106-preview",
-        messages,
-        max_tokens: 256,
-        temperature: 0.38,
+        messages: chatHistory.map(msg => ({
+          role: msg.role,
+          content: msg.content,
+        }))
       }),
     });
 
-    if (!response.ok) {
-      const errText = await response.text();
-      return new Response(JSON.stringify({ error: `OpenAI error: ${response.statusText} - ${errText}` }), {
+    if (!createThreadResp.ok) {
+      const text = await createThreadResp.text();
+      console.error("Failed to create thread:", text);
+      return new Response(JSON.stringify({ error: `Error creating thread: ${text}` }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const json = await response.json();
-    const aiText =
-      json.choices?.[0]?.message?.content ||
-      json.choices?.[0]?.text ||
-      "Couldn't understand.";
+    const thread = await createThreadResp.json();
+
+    // 2. Create a run with the assistant on the thread
+    const runResp = await fetch(`https://api.openai.com/v1/threads/${thread.id}/runs`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${openAIApiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        assistant_id: assistantId,
+      }),
+    });
+
+    if (!runResp.ok) {
+      const text = await runResp.text();
+      console.error("Failed to create run:", text);
+      return new Response(JSON.stringify({ error: `Error creating run: ${text}` }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const run = await runResp.json();
+
+    // 3. Poll for run completion
+    let status = run.status;
+    let runId = run.id;
+    const maxAttempts = 40;
+    let attempts = 0;
+    let outputMessages = [];
+    while (status !== "completed" && status !== "failed" && attempts < maxAttempts) {
+      await sleep(500);
+      attempts++;
+      const pollResp = await fetch(`https://api.openai.com/v1/threads/${thread.id}/runs/${runId}`, {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${openAIApiKey}`,
+        },
+      });
+      const pollData = await pollResp.json();
+      status = pollData.status;
+      if (status === "completed") {
+        // Fetch the messages from the thread
+        const msgResp = await fetch(`https://api.openai.com/v1/threads/${thread.id}/messages`, {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${openAIApiKey}`,
+          },
+        });
+        const msgData = await msgResp.json();
+        // Find assistant messages
+        outputMessages = msgData.data
+          .filter((m: any) => m.role === "assistant")
+          .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        break;
+      }
+    }
+
+    if (status !== "completed" || outputMessages.length === 0) {
+      return new Response(JSON.stringify({ error: "Migraine Doctor could not provide an answer in time. Please try again." }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const aiText = outputMessages[0].content?.[0]?.text?.value
+      || outputMessages[0].content
+      || "Couldn't understand.";
 
     return new Response(JSON.stringify({ analysis: aiText }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err) {
-    return new Response(JSON.stringify({ error: "Trouble talking to OpenAI. Please try again soon!" }), {
+    console.error("PainPal Assistant API error:", err);
+    return new Response(JSON.stringify({ error: "Trouble talking to Migraine Doctor. Please try again soon!" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
