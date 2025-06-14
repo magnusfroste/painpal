@@ -1,3 +1,4 @@
+
 import React from "react";
 import MigraineStepWizard from "@/components/MigraineStepWizard";
 import MigrainePreliminaryAnalysis from "@/components/MigrainePreliminaryAnalysis";
@@ -80,25 +81,19 @@ const HomeTabs: React.FC<HomeTabsProps> = ({
         </aside>
       </TabsContent>
       {/* Export/History Tab */}
-      <TabsContent value="history" className="mt-0 pb-24"> {/* Add bottom padding to avoid covered content */}
-        {/* Moved ExportDataButton to sticky bottom, so remove it from here */}
+      <TabsContent value="history" className="mt-0 pb-24">
         <div className="w-full rounded-2xl bg-white/80 py-2 px-2 shadow-sm mt-3">
           <MigrainHistoryChart history={history} />
         </div>
-        {/* The sticky Export button is rendered below outside TabsContent when Export tab is active */}
-      </TabsContent>
-      {/* Green Share button fixed to the bottom ONLY if Export tab is open */}
-      {activeTab === "history" && hasHistory && (
-        <div
-          className="fixed bottom-4 left-1/2 -translate-x-1/2 z-30 w-full max-w-[440px] px-4 flex justify-center pointer-events-none"
-        >
-          <div className="pointer-events-auto w-full flex justify-center">
-            <ExportDataButton history={history} />
-          </div>
+        {/* Place ExportDataButton directly under the history chart */}
+        <div className="w-full flex justify-center mt-2">
+          <ExportDataButton history={history} />
         </div>
-      )}
+      </TabsContent>
+      {/* Removed the fixed Export button at the bottom */}
     </Tabs>
   );
 };
 
 export default HomeTabs;
+
