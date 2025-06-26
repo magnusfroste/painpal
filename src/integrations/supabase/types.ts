@@ -71,6 +71,36 @@ export type Database = {
           },
         ]
       }
+      meeting_invites: {
+        Row: {
+          available_slots: Json
+          created_at: string
+          description: string | null
+          expires_at: string | null
+          id: string
+          inviter_name: string
+          title: string
+        }
+        Insert: {
+          available_slots: Json
+          created_at?: string
+          description?: string | null
+          expires_at?: string | null
+          id?: string
+          inviter_name: string
+          title: string
+        }
+        Update: {
+          available_slots?: Json
+          created_at?: string
+          description?: string | null
+          expires_at?: string | null
+          id?: string
+          inviter_name?: string
+          title?: string
+        }
+        Relationships: []
+      }
       migraine_entries: {
         Row: {
           amount: string
@@ -104,6 +134,44 @@ export type Database = {
         }
         Relationships: []
       }
+      participant_responses: {
+        Row: {
+          created_at: string
+          id: string
+          invite_id: string
+          participant_initials: string
+          participant_name: string
+          selected_slots: Json
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          invite_id: string
+          participant_initials: string
+          participant_name: string
+          selected_slots: Json
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          invite_id?: string
+          participant_initials?: string
+          participant_name?: string
+          selected_slots?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "participant_responses_invite_id_fkey"
+            columns: ["invite_id"]
+            isOneToOne: false
+            referencedRelation: "meeting_invites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           id: string
@@ -119,6 +187,113 @@ export type Database = {
           id?: string
           name?: string | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      scenes: {
+        Row: {
+          created_at: string
+          generation_job_id: string | null
+          id: string
+          prompt: string
+          scene_order: number
+          settings: Json
+          speech: string | null
+          status: string
+          story_id: string
+          title: string
+          updated_at: string
+          user_id: string
+          video_url: string | null
+        }
+        Insert: {
+          created_at?: string
+          generation_job_id?: string | null
+          id?: string
+          prompt: string
+          scene_order: number
+          settings: Json
+          speech?: string | null
+          status?: string
+          story_id: string
+          title?: string
+          updated_at?: string
+          user_id: string
+          video_url?: string | null
+        }
+        Update: {
+          created_at?: string
+          generation_job_id?: string | null
+          id?: string
+          prompt?: string
+          scene_order?: number
+          settings?: Json
+          speech?: string | null
+          status?: string
+          story_id?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+          video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scenes_story_id_fkey"
+            columns: ["story_id"]
+            isOneToOne: false
+            referencedRelation: "stories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      signed_diplomas: {
+        Row: {
+          blockchain_id: string
+          content_hash: string
+          created_at: string
+          diploma_css: string
+          diploma_html: string
+          diploma_url: string | null
+          diplomator_seal: string
+          id: string
+          institution_name: string
+          issuer_id: string
+          recipient_name: string
+          signature: string
+          updated_at: string
+          verification_url: string
+        }
+        Insert: {
+          blockchain_id: string
+          content_hash: string
+          created_at?: string
+          diploma_css: string
+          diploma_html: string
+          diploma_url?: string | null
+          diplomator_seal: string
+          id?: string
+          institution_name: string
+          issuer_id: string
+          recipient_name: string
+          signature: string
+          updated_at?: string
+          verification_url: string
+        }
+        Update: {
+          blockchain_id?: string
+          content_hash?: string
+          created_at?: string
+          diploma_css?: string
+          diploma_html?: string
+          diploma_url?: string | null
+          diplomator_seal?: string
+          id?: string
+          institution_name?: string
+          issuer_id?: string
+          recipient_name?: string
+          signature?: string
+          updated_at?: string
+          verification_url?: string
         }
         Relationships: []
       }
@@ -140,6 +315,30 @@ export type Database = {
           account_type?: string | null
           created_at?: string | null
           name?: string
+        }
+        Relationships: []
+      }
+      stories: {
+        Row: {
+          created_at: string
+          id: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          title?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
