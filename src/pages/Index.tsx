@@ -1,70 +1,38 @@
-
 import React, { useState, useEffect } from "react";
-import MigraineStepWizard from "@/components/MigraineStepWizard";
-import MigrainHistoryChart from "@/components/MigrainHistoryChart";
-import ExportDataButton from "@/components/ExportDataButton";
-import InfoButton from "@/components/InfoButton";
-import AINurseMascot from "@/components/AINurseMascot";
-import MigrainePreliminaryAnalysis from "@/components/MigrainePreliminaryAnalysis";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
-import AddToHomeScreenBanner from "@/components/AddToHomeScreenBanner";
-import { Drawer, DrawerContent } from "@/components/ui/drawer";
 import { useIsMobile } from "@/hooks/use-mobile";
 import HomeTabs from "@/components/HomeTabs";
+import AINurseMascot from "@/components/AINurseMascot";
+import { LogOut, X } from "lucide-react";
 
-/** Toast-like component (quick inline for now) */
-const ErrorToast = ({
-  message,
-  onClose
-}: {
-  message: string;
-  onClose: () => void;
-}) => <div className="fixed top-6 left-1/2 z-50 -translate-x-1/2 bg-red-600 text-white px-6 py-3 rounded-full shadow-lg flex items-center gap-4 font-bold">
-    <span>⚠️ {message}</span>
-    <button onClick={onClose} className="ml-4 underline text-white">Dismiss</button>
-  </div>;
-
-// Header friendly message for each tab
-const TAB_HEADER_MAP: Record<string, string> = {
-  track: "Welcome back, superstar! I’m here to help whenever you need me 🤗",
-  analysis: "Let’s discover some insights together from your data 📈",
-  learn: "Level up your knowledge — learn, get tips and feel empowered! 🧠",
-  history: "Here is your journey so far. Keep tracking for revealing patterns! 🌈",
-};
-
-// New: mascot variant and text for each tab
 const TAB_MASCOT_MAP: Record<
   string,
   { variant: "normal" | "analysis" | "learn" | "history" | "celebrate" | "welcome"; message: string }
 > = {
   track: {
     variant: "normal",
-    message: "Let's track your headache or migraine! Just hit the button below when you're ready 👍",
+    message: "Let's track your headache — tap the answer that fits best 👍",
   },
   analysis: {
     variant: "analysis",
-    message:
-      "Here's what your tracked data reveals. Understanding your patterns is key! 📊",
+    message: "Here's what your data reveals. Patterns are power! 📊",
   },
   learn: {
     variant: "learn",
-    message:
-      "Boost your knowledge! Learn about headaches, get tips, and empower yourself. 🌟",
+    message: "Boost your knowledge and feel more in control 🌟",
   },
   history: {
     variant: "history",
-    message:
-      "This is your journey so far. The more you track, the more you'll discover! 🌈",
+    message: "This is your journey so far. Keep going! 🌈",
   },
-  // fallback for celebrate/welcome if needed
   celebrate: {
     variant: "celebrate",
-    message: "Thank you for sharing! This info will help your doctor help you! 🌈",
+    message: "Thanks for sharing! This helps your doctor help you 🌈",
   },
   welcome: {
     variant: "welcome",
-    message: "Welcome back, superstar! I’m here to help whenever you need me 🤗",
+    message: "Welcome back, superstar! I'm here whenever you need me 🤗",
   },
 };
 
@@ -79,16 +47,12 @@ const Index = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
 
-  // Check user, redirect if not logged in
   useEffect(() => {
-    supabase.auth.getSession().then(({
-      data: { session }
-    }) => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
       if (!session?.user) navigate("/auth");
     });
   }, [navigate]);
 
-  // Helper: fetch all entries in the table for the current user (ordered chronologically)
   const fetchEntries = async () => {
     setLoading(true);
     try {
@@ -96,7 +60,11 @@ const Index = () => {
       if (!session?.user) {
         setHistory([]);
       } else {
-        const { data, error } = await supabase.from("migraine_entries").select("*").eq("user_id", session.user.id).order("timestamp", { ascending: true });
+        const { data, error } = await supabase
+          .from("migraine_entries")
+          .select("*")
+          .eq("user_id", session.user.id)
+          .order("timestamp", { ascending: true });
         if (error) {
           setSaveError("Unable to load your migraine history.");
           setHistory([]);
@@ -140,48 +108,66 @@ const Index = () => {
       setSaveError("Could not save entry. Try refreshing the page.");
     }
     setSaving(false);
-    setWizardOpen(false); // close drawer after saving (mobile)
-    setTimeout(() => setWizardOpen(true), 2000); // allow quick re-add
+    setWizardOpen(false);
+    setTimeout(() => setWizardOpen(true), 2000);
   };
 
-  // Automatically switch to Insights ("analysis" tab) after celebrate feedback
   useEffect(() => {
     if (celebrate) {
-      // Wait about 1 second so the user sees the feedback, then switch
-      const timer = setTimeout(() => {
-        setActiveTab("analysis");
-      }, 1100);
+      const timer = setTimeout(() => setActiveTab("analysis"), 1100);
       return () => clearTimeout(timer);
     }
   }, [celebrate]);
 
-  // Mascot logic
-  const mascotProps =
-    celebrate
-      ? TAB_MASCOT_MAP["celebrate"]
-      : activeTab && TAB_MASCOT_MAP[activeTab]
-      ? TAB_MASCOT_MAP[activeTab]
-      : TAB_MASCOT_MAP["track"];
+  const mascotProps = celebrate
+    ? TAB_MASCOT_MAP["celebrate"]
+    : TAB_MASCOT_MAP[activeTab] || TAB_MASCOT_MAP["track"];
 
-  // Add this function to handle proper sign out
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     navigate("/auth", { replace: true });
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-start bg-gradient-to-b from-blue-200 via-purple-100 to-pink-100 relative font-sans overflow-x-hidden
-      sm:pt-safe sm:pb-safe">
-      {/* <AddToHomeScreenBanner /> -- moved to sign up info popup */}
-      {saveError && <ErrorToast message={saveError} onClose={() => setSaveError(null)} />}
-      {/* "Apple style" blurred top bar */}
-      <header className="w-full z-40 flex flex-col items-center pt-8 mb-3 py-[5px]">
-        <div className="w-full max-w-[440px] backdrop-blur-xl bg-white/60 rounded-3xl shadow-xl py-1 mx-2 mb-3 border border-white/50 px-[8px]">
+    <div className="relative min-h-screen w-full overflow-x-hidden">
+      {/* Ambient blobs */}
+      <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+        <div className="absolute -left-16 top-10 h-56 w-56 rounded-full bg-primary/20 blur-3xl animate-blob" />
+        <div className="absolute -right-20 top-1/3 h-64 w-64 rounded-full bg-accent/20 blur-3xl animate-blob" style={{ animationDelay: "3s" }} />
+        <div className="absolute bottom-0 left-1/4 h-56 w-56 rounded-full bg-secondary/20 blur-3xl animate-blob" style={{ animationDelay: "6s" }} />
+      </div>
+
+      {saveError && (
+        <div className="fixed left-1/2 top-4 z-50 flex w-[min(100%-2rem,420px)] -translate-x-1/2 items-start gap-3 rounded-2xl bg-destructive px-4 py-3 text-sm font-bold text-destructive-foreground shadow-card animate-pop-in">
+          <span className="flex-1">⚠️ {saveError}</span>
+          <button onClick={() => setSaveError(null)} aria-label="Dismiss">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+
+      <div className="mx-auto flex w-full max-w-[440px] flex-col px-4 safe-top">
+        <header className="flex items-center justify-between pb-3 pt-6">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">PainPal</p>
+            <h1 className="font-display text-2xl font-extrabold leading-tight text-foreground">
+              Hi there 👋
+            </h1>
+          </div>
+          <button
+            onClick={handleSignOut}
+            aria-label="Log out"
+            className="tap grid h-11 w-11 place-items-center rounded-2xl bg-card/80 text-muted-foreground shadow-soft backdrop-blur"
+          >
+            <LogOut className="h-5 w-5" />
+          </button>
+        </header>
+
+        <div className="surface-card mb-4 px-4 py-3 animate-fade-in">
           <AINurseMascot variant={mascotProps.variant} message={mascotProps.message} />
         </div>
-      </header>
-      <main className="flex-1 w-full flex flex-col items-center px-0 py-0 pb-24">
-        <div className="w-full max-w-[440px] flex flex-col items-stretch flex-1 mx-auto">
+
+        <main className="flex-1 pb-32">
           <HomeTabs
             history={history}
             loading={loading}
@@ -192,22 +178,12 @@ const Index = () => {
             setWizardOpen={setWizardOpen}
             wizardOpen={wizardOpen}
             onTabChange={setActiveTab}
-            // NEW: activeTab prop forces the tab shown, changes with setActiveTab
             activeTab={activeTab}
           />
-          <div className="py-[10px]" />
-        </div>
-      </main>
-      {/* Sticky Switch User / Log Out button at bottom center */}
-      <div className="fixed bottom-4 left-0 right-0 z-40 flex justify-center pointer-events-none w-full">
-        <button onClick={handleSignOut} className="pointer-events-auto px-6 py-2 text-sm rounded-full bg-pink-200 text-pink-900 font-bold hover:bg-pink-300 transition hover-scale shadow inline-block" style={{
-          maxWidth: 440,
-          width: "90%"
-        }}>
-          Switch User / Log Out
-        </button>
+        </main>
       </div>
     </div>
   );
 };
+
 export default Index;
