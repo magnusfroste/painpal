@@ -106,13 +106,13 @@ const MigrainHistoryChart = ({ history }: { history: any[] }) => {
 
       <div className="mt-4 flex flex-wrap gap-2">
         {[
-          { c: "pain-1", l: "A little" },
-          { c: "pain-2", l: "Medium" },
-          { c: "pain-3", l: "A lot" },
-          { c: "pain-4", l: "Too much" },
+          { c: "bg-pain-1", l: "A little" },
+          { c: "bg-pain-2", l: "Medium" },
+          { c: "bg-pain-3", l: "A lot" },
+          { c: "bg-pain-4", l: "Too much" },
         ].map((x) => (
           <span key={x.l} className="pill bg-muted text-muted-foreground inline-flex items-center gap-1.5">
-            <span className={`h-2.5 w-2.5 rounded-full bg-${x.c}`} />
+            <span className={`h-2.5 w-2.5 rounded-full ${x.c}`} />
             {x.l}
           </span>
         ))}
