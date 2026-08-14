@@ -1,7 +1,6 @@
 import React from "react";
-import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer } from "recharts";
+import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer, Cell, CartesianGrid } from "recharts";
 
-// Map label and an order/length value for "where" and "when"
 const labelMap: Record<string, string> = {
   front: "Front",
   back: "Back",
@@ -9,14 +8,13 @@ const labelMap: Record<string, string> = {
   right: "Right",
 };
 
-const colorMap: Record<string, string> = {
-  light: "#8ED88F",
-  medium: "#FFF082",
-  hard: "#FFB996",
-  super: "#FF6464",
+const painColor: Record<string, string> = {
+  light: "hsl(var(--pain-1))",
+  medium: "hsl(var(--pain-2))",
+  hard: "hsl(var(--pain-3))",
+  super: "hsl(var(--pain-4))",
 };
 
-// Map "when" string to a headache length value in minutes, for bar height
 const lengthValueMap: Record<string, number> = {
   fewmin: 5,
   "30min": 25,
@@ -31,88 +29,114 @@ const lengthFriendly: Record<string, string> = {
   long: "Longer",
 };
 
+const causeFriendly: Record<string, string> = {
+  playing: "Playing",
+  screen: "Screen time",
+  eating: "Eating",
+  wake: "Just woke up",
+};
+
+const emojiFor = (amount: string) =>
+  amount === "light" ? "🙂" : amount === "medium" ? "😐" : amount === "hard" ? "😖" : amount === "super" ? "😭" : "";
+
 const MigrainHistoryChart = ({ history }: { history: any[] }) => {
-  // Show latest 8 entries
   const chartData = history.slice(-8).map((entry, idx) => ({
     idx: idx + 1,
     where: labelMap[entry.where] || entry.where,
     amount: entry.amount,
     when: entry.when,
-    cause: entry.cause,
-    emoji: (() => {
-      if (entry.amount === "light") return "🙂";
-      if (entry.amount === "medium") return "😐";
-      if (entry.amount === "hard") return "😖";
-      if (entry.amount === "super") return "😭";
-      return "";
-    })(),
-    color: colorMap[entry.amount] || "#A3D8F4",
-    lengthValue: lengthValueMap[entry.when] || 0,
+    cause: causeFriendly[entry.cause] || entry.cause,
+    date: entry.timestamp ? new Date(entry.timestamp).toLocaleDateString(undefined, { day: "numeric", month: "short" }) : "",
+    emoji: emojiFor(entry.amount),
+    color: painColor[entry.amount] || "hsl(var(--primary))",
+    lengthValue: lengthValueMap[entry.when] || 5,
     lengthLabel: lengthFriendly[entry.when] || entry.when,
   }));
 
-  // Find the max value for scaling bar heights nicely
-  const maxLength = Math.max(...chartData.map(d => d.lengthValue), 1);
+  if (!chartData.length) {
+    return (
+      <section className="surface-card w-full p-8 text-center animate-fade-in">
+        <div className="text-5xl mb-3" aria-hidden>🌱</div>
+        <h2 className="font-display text-xl font-extrabold">No entries yet</h2>
+        <p className="mt-1 text-sm text-muted-foreground font-semibold">
+          Log your first headache in the Track tab and your journey starts here.
+        </p>
+      </section>
+    );
+  }
 
   return (
-    <div className="w-full max-w-2xl mx-auto mb-8 mt-2 p-6 bg-white shadow-md rounded-2xl animate-fade-in">
-      <div className="font-semibold text-lg mb-3 text-center text-blue-700">
-        My Headache History
-      </div>
-      <ResponsiveContainer width="100%" height={180}>
-        <BarChart data={chartData}>
-          <XAxis dataKey="idx" tick={false} />
+    <section className="surface-card w-full p-5 animate-fade-in">
+      <header className="mb-4 flex items-center justify-between">
+        <h2 className="font-display text-lg font-extrabold">My headache journey</h2>
+        <span className="pill bg-primary-soft text-primary">{history.length} logged</span>
+      </header>
+
+      <ResponsiveContainer width="100%" height={170}>
+        <BarChart data={chartData} margin={{ top: 8, right: 4, left: 4, bottom: 0 }} barCategoryGap="25%">
+          <CartesianGrid vertical={false} stroke="hsl(var(--border))" strokeDasharray="3 6" />
+          <XAxis
+            dataKey="emoji"
+            tickLine={false}
+            axisLine={false}
+            tick={{ fontSize: 16 }}
+            interval={0}
+          />
           <Tooltip
+            cursor={{ fill: "hsl(var(--muted))", radius: 12 }}
             content={({ active, payload }) =>
               active && payload && payload.length ? (
-                <div className="rounded-xl p-3 bg-blue-50 border border-blue-200 shadow text-sm">
+                <div className="rounded-2xl border border-border bg-popover p-3 text-xs shadow-card space-y-1">
+                  <div className="font-display font-bold text-sm">{payload[0].payload.date}</div>
                   <div><b>Where:</b> {payload[0].payload.where}</div>
                   <div><b>How much:</b> {payload[0].payload.emoji}</div>
-                  <div><b>Length:</b> {payload[0].payload.lengthLabel}</div>
-                  <div><b>What before:</b> {payload[0].payload.cause}</div>
+                  <div><b>How long:</b> {payload[0].payload.lengthLabel}</div>
+                  <div><b>Before:</b> {payload[0].payload.cause}</div>
                 </div>
               ) : null
             }
           />
-          <Bar 
-            dataKey="lengthValue" 
-            fill="#93c5fd"
-          >
-            {chartData.map((entry, index) => {
-              // Calculate proportional height (min: 36px, max: 120px)
-              const maxChartHeight = 120;
-              const minChartHeight = 36;
-              const height = minChartHeight + ((entry.lengthValue / maxLength) * (maxChartHeight - minChartHeight));
-              const y = 180 - height;
-              return (
-                <rect
-                  key={index}
-                  x={index * 48}
-                  width={36}
-                  y={y}
-                  height={height}
-                  rx={10}
-                  fill={entry.color}
-                />
-              );
-            })}
+          <Bar dataKey="lengthValue" radius={[12, 12, 12, 12]} minPointSize={12}>
+            {chartData.map((entry, index) => (
+              <Cell key={index} fill={entry.color} />
+            ))}
           </Bar>
         </BarChart>
       </ResponsiveContainer>
-      <div className="mt-2 flex justify-center gap-2">
-        {chartData.map((entry, idx) => (
-          <div
-            key={idx}
-            className="flex flex-col items-center"
-            style={{ minWidth: 30 }}
-          >
-            <span style={{ fontSize: 24 }}>{entry.emoji}</span>
-            <span className="text-xs text-blue-500">{entry.where}</span>
-            {/* Removed lengthLabel from below each entry */}
-          </div>
+
+      <div className="mt-4 flex flex-wrap gap-2">
+        {[
+          { c: "pain-1", l: "A little" },
+          { c: "pain-2", l: "Medium" },
+          { c: "pain-3", l: "A lot" },
+          { c: "pain-4", l: "Too much" },
+        ].map((x) => (
+          <span key={x.l} className="pill bg-muted text-muted-foreground inline-flex items-center gap-1.5">
+            <span className={`h-2.5 w-2.5 rounded-full bg-${x.c}`} />
+            {x.l}
+          </span>
         ))}
       </div>
-    </div>
+
+      <ul className="mt-4 space-y-2">
+        {[...history].slice(-5).reverse().map((entry, i) => (
+          <li key={i} className="flex items-center gap-3 rounded-2xl bg-muted/60 px-3 py-2.5">
+            <span className="text-2xl" aria-hidden>{emojiFor(entry.amount)}</span>
+            <div className="min-w-0 flex-1">
+              <p className="truncate font-bold text-sm">
+                {labelMap[entry.where] || entry.where} · {lengthFriendly[entry.when] || entry.when}
+              </p>
+              <p className="truncate text-xs text-muted-foreground font-semibold">
+                After {(causeFriendly[entry.cause] || entry.cause || "").toLowerCase()}
+              </p>
+            </div>
+            <span className="shrink-0 text-xs text-muted-foreground font-semibold">
+              {entry.timestamp ? new Date(entry.timestamp).toLocaleDateString(undefined, { day: "numeric", month: "short" }) : ""}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 };
 
