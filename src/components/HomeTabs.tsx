@@ -4,11 +4,9 @@ import MigrainePreliminaryAnalysis from "@/components/MigrainePreliminaryAnalysi
 import InfoButton from "@/components/InfoButton";
 import ExportDataButton from "@/components/ExportDataButton";
 import MigrainHistoryChart from "@/components/MigrainHistoryChart";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Card } from "@/components/ui/card";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { Activity, BarChart2, BookOpen, Clock } from "lucide-react";
 
-// Typing for props from Index.tsx
 interface HomeTabsProps {
   history: any[];
   loading: boolean;
@@ -18,22 +16,15 @@ interface HomeTabsProps {
   isMobile?: boolean;
   setWizardOpen: (open: boolean) => void;
   wizardOpen: boolean;
-  onTabChange?: (tab: string) => void; // NEW
+  onTabChange?: (tab: string) => void;
 }
 
-const TAB_ICONS = {
-  track: Activity,
-  analysis: BarChart2,
-  learn: BookOpen,
-  history: Clock,
-};
-
-const TAB_LABELS = {
-  track: "Track",
-  analysis: "Insights",
-  learn: "Learn",
-  history: "History",
-};
+const TABS = [
+  { value: "track", label: "Track", icon: Activity },
+  { value: "analysis", label: "Insights", icon: BarChart2 },
+  { value: "learn", label: "Learn", icon: BookOpen },
+  { value: "history", label: "History", icon: Clock },
+] as const;
 
 const HomeTabs: React.FC<HomeTabsProps & { activeTab?: string }> = ({
   history,
@@ -41,17 +32,12 @@ const HomeTabs: React.FC<HomeTabsProps & { activeTab?: string }> = ({
   saving,
   celebrate,
   handleEntryAdd,
-  isMobile = false,
-  setWizardOpen,
-  wizardOpen,
   onTabChange,
-  activeTab: controlledActiveTab, // NEW
+  activeTab: controlledActiveTab,
 }) => {
-  // Analysis tab available only if user has entries
   const hasHistory = history.length > 0;
   const [activeTab, setActiveTab] = React.useState("track");
 
-  // Sync with parent (Index) if given as a prop
   React.useEffect(() => {
     if (controlledActiveTab && controlledActiveTab !== activeTab) {
       setActiveTab(controlledActiveTab);
@@ -59,126 +45,90 @@ const HomeTabs: React.FC<HomeTabsProps & { activeTab?: string }> = ({
     // eslint-disable-next-line
   }, [controlledActiveTab]);
 
-  // When tab changes, notify parent
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
     if (onTabChange) onTabChange(tab);
   };
 
-  // Tab order
-  const tabs = [
-    { value: "track" },
-    { value: "analysis", disabled: !hasHistory },
-    { value: "learn" },
-    { value: "history" },
-  ];
-
   return (
-    <Tabs
-      value={activeTab}
-      defaultValue="track"
-      className={`w-full`}
-      onValueChange={handleTabChange}
-    >
-      <TabsList
-        className={`
-          w-full 
-          flex-nowrap
-          justify-between
-          rounded-2xl
-          mb-2
-          px-0
-          py-1
-          shadow
-          bg-blue-50/80
-          gap-1
-          overflow-x-auto
-          ${isMobile ? "h-14 min-h-0" : "h-auto"}
-          sm:mb-4
-        `}
-        style={{
-          WebkitOverflowScrolling: "touch",
-          scrollbarWidth: "none",
-        }}
-      >
-        {tabs.map((tab) => {
-          const Icon = TAB_ICONS[tab.value as keyof typeof TAB_ICONS];
-          return (
-            <TabsTrigger
-              key={tab.value}
-              value={tab.value}
-              disabled={tab.disabled}
-              className={`
-                flex flex-col items-center justify-center min-w-0 flex-1 px-1 py-1 
-                sm:py-2 rounded-lg
-                ${tab.value === "track" ? "text-blue-700" : ""}
-                ${tab.value === "analysis" ? "text-purple-700" : ""}
-                ${tab.value === "learn" ? "text-pink-700" : ""}
-                ${tab.value === "history" ? "text-green-700" : ""}
-                ${isMobile ? "text-xs sm:text-sm" : "text-sm"}
-                ${tab.disabled ? "opacity-50" : ""}
-                transition
-              `}
-              style={{
-                minWidth: 0,
-                fontSize: isMobile ? "0.85rem" : undefined,
-                padding: isMobile ? "0.10rem 0.2rem" : undefined,
-              }}
-            >
-              <Icon size={isMobile ? 20 : 22} className="mb-0.5" />
-              <span className={isMobile ? "text-xs" : "text-sm"}>{TAB_LABELS[tab.value as keyof typeof TAB_LABELS]}</span>
-            </TabsTrigger>
-          );
-        })}
-      </TabsList>
-      {/* Track Tab: Migraine Wizard */}
-      <TabsContent value="track" className={`${isMobile ? "mt-0 px-0 py-2" : "mt-0"} transition`}>
+    <Tabs value={activeTab} defaultValue="track" className="w-full" onValueChange={handleTabChange}>
+      {/* Content */}
+      <TabsContent value="track" className="mt-0 focus-visible:outline-none">
         <MigraineStepWizard onComplete={handleEntryAdd}>
           {saving && (
-            <div className="mt-2 text-base text-blue-500 text-center animate-pulse">
-              Saving entry…
-            </div>
+            <p className="mt-4 animate-pulse text-center text-sm font-bold text-primary">Saving entry…</p>
           )}
           {celebrate && (
-            <div className="mt-2 text-xl font-bold text-green-600 animate-bounce text-center">
-              🎉 Thanks! <br /> Collecting this data is super helpful!
-            </div>
+            <p className="mt-4 animate-pop-in rounded-2xl bg-secondary-soft px-4 py-3 text-center font-display font-extrabold text-secondary">
+              🎉 Thanks! This really helps.
+            </p>
           )}
         </MigraineStepWizard>
       </TabsContent>
-      {/* Insights Tab */}
-      <TabsContent value="analysis" className={`${isMobile ? "mt-0 px-0 py-2" : "mt-0"} transition`}>
+
+      <TabsContent value="analysis" className="mt-0 focus-visible:outline-none">
         {loading ? (
-          <div className="mb-4 text-sm text-blue-500 text-center">Loading your headache history…</div>
+          <div className="surface-card p-6 text-center text-sm font-bold text-primary animate-pulse">
+            Loading your history…
+          </div>
         ) : (
           <MigrainePreliminaryAnalysis history={history} />
         )}
       </TabsContent>
-      {/* Learn Tab */}
-      <TabsContent value="learn" className={`${isMobile ? "mt-0 px-0 py-2" : "mt-0"} transition`}>
-        <aside className="w-full flex flex-col items-center gap-3">
-          <div className={`font-extrabold ${isMobile ? "text-base mb-0" : "text-lg mb-1"} text-purple-800`}>Learn more:</div>
-          <div className={`w-full flex flex-row flex-wrap gap-2 justify-center`}>
+
+      <TabsContent value="learn" className="mt-0 focus-visible:outline-none">
+        <div className="flex flex-col gap-4">
+          <div className="grid grid-cols-2 gap-3">
             <InfoButton type="what" />
             <InfoButton type="tips" />
             <InfoButton type="parents" />
             <InfoButton type="safe" />
           </div>
-          <div className="w-full max-w-2xl mt-2 bg-yellow-50 border border-yellow-200 rounded-2xl shadow p-4 text-yellow-900 text-base font-semibold flex flex-col items-start">
-            <span className="block font-bold mb-1 text-yellow-800">Remember:</span>
-            <span>
-              Don’t forget to keep logging your headaches and tell your doctor all about them next time you visit. Your notes are super helpful to understand how you’re feeling!
-            </span>
+          <div className="surface-card p-5">
+            <h3 className="font-display text-base font-extrabold text-foreground">Remember 💛</h3>
+            <p className="mt-1 text-sm font-semibold leading-relaxed text-foreground/75">
+              Keep logging your headaches and tell your doctor about them next visit. Your notes make it
+              much easier to understand how you're feeling.
+            </p>
           </div>
-        </aside>
+        </div>
       </TabsContent>
-      {/* History Tab */}
-      <TabsContent value="history" className={`${isMobile ? "mt-0 px-0 py-2 pb-8" : "mt-0 pb-16"} transition`}>
-        <MigrainHistoryChart history={history} />
-        <div className="flex justify-center mt-3 w-full">
+
+      <TabsContent value="history" className="mt-0 focus-visible:outline-none">
+        <div className="flex flex-col gap-4">
+          <MigrainHistoryChart history={history} />
           <ExportDataButton history={history} />
         </div>
       </TabsContent>
+
+      {/* Bottom navigation (mobile-first, thumb friendly) */}
+      <nav
+        className="fixed inset-x-0 bottom-0 z-40 safe-bottom pointer-events-none"
+        aria-label="Main sections"
+      >
+        <div className="pointer-events-auto mx-auto flex w-[min(100%-1rem,440px)] items-stretch gap-1 rounded-[1.75rem] border border-white/60 bg-card/85 p-1.5 shadow-card backdrop-blur-xl dark:border-white/10">
+          {TABS.map((tab) => {
+            const Icon = tab.icon;
+            const active = activeTab === tab.value;
+            const disabled = tab.value === "analysis" && !hasHistory;
+            return (
+              <button
+                key={tab.value}
+                type="button"
+                onClick={() => !disabled && handleTabChange(tab.value)}
+                disabled={disabled}
+                aria-current={active ? "page" : undefined}
+                className={`tap flex min-h-[56px] flex-1 flex-col items-center justify-center gap-1 rounded-3xl px-1 text-[11px] font-bold transition
+                  ${active ? "bg-gradient-primary text-primary-foreground shadow-glow" : "text-muted-foreground"}
+                  ${disabled ? "opacity-40" : ""}`}
+              >
+                <Icon className="h-5 w-5" />
+                <span>{tab.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </nav>
     </Tabs>
   );
 };
