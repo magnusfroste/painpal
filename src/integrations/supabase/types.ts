@@ -14,7 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      migraine_entries: {
+        Row: {
+          amount: string
+          cause: string
+          created_at: string
+          id: string
+          timestamp: string
+          user_id: string
+          when: string
+          where: string
+        }
+        Insert: {
+          amount: string
+          cause: string
+          created_at?: string
+          id?: string
+          timestamp?: string
+          user_id: string
+          when: string
+          where: string
+        }
+        Update: {
+          amount?: string
+          cause?: string
+          created_at?: string
+          id?: string
+          timestamp?: string
+          user_id?: string
+          when?: string
+          where?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
