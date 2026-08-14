@@ -1,44 +1,42 @@
-
 import React from "react";
-import { Info, Hand, BarChart2, BookOpen, Clock } from "lucide-react";
+import { Hand, BarChart2, BookOpen, Clock, Sparkles } from "lucide-react";
 
-// NEW: More mascot icon variants for the various tabs
-const iconVariants: Record<string, React.ReactNode> = {
-  normal: <Hand size={38} className="text-blue-500" />,
-  analysis: <BarChart2 size={38} className="text-purple-500" />,
-  learn: <BookOpen size={38} className="text-pink-600" />,
-  history: <Clock size={38} className="text-green-600" />,
-  celebrate: <Hand size={38} className="text-pink-500 animate-pulse" />,
-  welcome: <Hand size={38} className="text-blue-500" />,
+type Variant = "normal" | "happy" | "celebrate" | "welcome" | "analysis" | "learn" | "history";
+
+const variantStyles: Record<string, { icon: React.ReactNode; ring: string; bg: string }> = {
+  normal: { icon: <Hand className="h-7 w-7 text-primary" />, ring: "ring-primary/25", bg: "bg-primary-soft" },
+  analysis: { icon: <BarChart2 className="h-7 w-7 text-secondary" />, ring: "ring-secondary/25", bg: "bg-secondary-soft" },
+  learn: { icon: <BookOpen className="h-7 w-7 text-accent" />, ring: "ring-accent/25", bg: "bg-accent-soft" },
+  history: { icon: <Clock className="h-7 w-7 text-sunny" />, ring: "ring-sunny/25", bg: "bg-sunny-soft" },
+  celebrate: { icon: <Sparkles className="h-7 w-7 text-accent animate-pulse" />, ring: "ring-accent/30", bg: "bg-accent-soft" },
+  welcome: { icon: <Hand className="h-7 w-7 text-primary" />, ring: "ring-primary/25", bg: "bg-primary-soft" },
+  happy: { icon: <Sparkles className="h-7 w-7 text-primary" />, ring: "ring-primary/25", bg: "bg-primary-soft" },
 };
 
 const AINurseMascot = ({
   variant = "normal",
   message,
 }: {
-  variant?: "normal" | "happy" | "celebrate" | "welcome" | "analysis" | "learn" | "history";
+  variant?: Variant;
   message?: string;
 }) => {
-  // Fallback for message if not passed
+  const style = variantStyles[variant] || variantStyles.normal;
   const fallbackMessage =
     variant === "celebrate"
-      ? "Thank you for sharing! This info will help your doctor help you! 🌈"
-      : "Hi! I’m your PainPal. Ready to help you track your headache 👋";
+      ? "Thank you for sharing! This helps your doctor help you 🌈"
+      : "Hi! I'm PainPal. Ready to track your headache 👋";
 
   return (
-    <div className="flex flex-col items-center mb-3">
-      <div className="rounded-full bg-blue-100 border-4 border-blue-300 shadow-md w-20 h-20 flex items-center justify-center transition-all duration-500 ease-out">
-        {iconVariants[variant] || iconVariants.normal}
-      </div>
-      <span
-        className="block text-lg mt-2 font-semibold text-blue-700 text-center max-w-xs"
-        style={{
-          fontFamily:
-            "'San Francisco', 'SF Pro Text', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Arial', 'sans-serif'",
-        }}
+    <div className="flex items-center gap-3 text-left">
+      <div
+        className={`shrink-0 grid place-items-center h-14 w-14 rounded-2xl ring-4 ${style.ring} ${style.bg} animate-float`}
+        aria-hidden
       >
+        {style.icon}
+      </div>
+      <p className="text-sm sm:text-base font-semibold leading-snug text-foreground/80">
         {message || fallbackMessage}
-      </span>
+      </p>
     </div>
   );
 };

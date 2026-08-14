@@ -1,10 +1,9 @@
-
 import React, { useState, ReactNode } from "react";
-import AINurseMascot from "./AINurseMascot";
 
 const steps = [
   {
     question: "Where does it hurt?",
+    hint: "Tap the spot that feels closest",
     options: [
       { label: "Front", emoji: "😣", value: "front" },
       { label: "Back", emoji: "😕", value: "back" },
@@ -14,6 +13,7 @@ const steps = [
   },
   {
     question: "How much does it hurt?",
+    hint: "There is no wrong answer",
     options: [
       { label: "A little", emoji: "🙂", value: "light" },
       { label: "Medium", emoji: "😐", value: "medium" },
@@ -23,6 +23,7 @@ const steps = [
   },
   {
     question: "How long has it hurt?",
+    hint: "Your best guess is fine",
     options: [
       { label: "A few minutes", emoji: "⏱️", value: "fewmin" },
       { label: "Less than 30 min", emoji: "🕧", value: "30min" },
@@ -32,6 +33,7 @@ const steps = [
   },
   {
     question: "What were you doing before?",
+    hint: "Last thing you remember doing",
     options: [
       { label: "Playing", emoji: "⚽", value: "playing" },
       { label: "Screen time", emoji: "📱", value: "screen" },
@@ -51,17 +53,20 @@ const MigraineStepWizard = ({
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<any[]>([]);
   const [disabled, setDisabled] = useState(false);
+  const [picked, setPicked] = useState<string | null>(null);
 
   const handleOptionClick = (option: any) => {
     if (disabled) return;
+    setPicked(option.value);
     const nextAnswers = [...answers, option.value];
     if (currentStep < steps.length - 1) {
       setAnswers(nextAnswers);
-      setCurrentStep(currentStep + 1);
+      setTimeout(() => {
+        setCurrentStep((s) => s + 1);
+        setPicked(null);
+      }, 140);
     } else {
-      // All done! Disable buttons *immediately*
       setDisabled(true);
-      // Force re-render before triggering onComplete to ensure UI disables last options
       setTimeout(() => {
         onComplete({
           where: nextAnswers[0],
@@ -70,53 +75,93 @@ const MigraineStepWizard = ({
           cause: nextAnswers[3],
           timestamp: new Date().toISOString(),
         });
-        // Reset after thank you
         setTimeout(() => {
           setAnswers([]);
           setCurrentStep(0);
           setDisabled(false);
-        }, 1100); // same as feedback/celebrate duration in Index.tsx
+          setPicked(null);
+        }, 1100);
       }, 0);
     }
   };
 
-  const { question, options } = steps[currentStep];
+  const goBack = () => {
+    if (currentStep === 0 || disabled) return;
+    setAnswers((a) => a.slice(0, -1));
+    setCurrentStep((s) => s - 1);
+  };
+
+  const { question, hint, options } = steps[currentStep];
+  const progress = ((currentStep) / steps.length) * 100;
 
   return (
-    <div className="w-full max-w-md mx-auto p-4 rounded-2xl bg-white shadow-lg animate-fade-in sm:p-6">
-      <div>
-        <div className="text-[1.25rem] sm:text-xl font-bold text-gray-800 mb-3 text-center">{question}</div>
-        <div className={`grid grid-cols-2 gap-4 ${disabled ? "opacity-60 pointer-events-none select-none" : ""}`}>
-          {options.map((option) => (
+    <section className="surface-card w-full p-5 sm:p-6 animate-fade-in">
+      {/* Progress */}
+      <div className="flex items-center gap-3 mb-4">
+        <div className="h-2 flex-1 rounded-full bg-muted overflow-hidden">
+          <div
+            className="h-full rounded-full bg-gradient-primary transition-all duration-300"
+            style={{ width: `${Math.max(progress, 6)}%` }}
+          />
+        </div>
+        <span className="text-xs font-bold text-muted-foreground tabular-nums">
+          {currentStep + 1}/{steps.length}
+        </span>
+      </div>
+
+      <h2 className="text-2xl sm:text-3xl font-display font-extrabold text-foreground text-center leading-tight">
+        {question}
+      </h2>
+      <p className="mt-1 mb-5 text-center text-sm text-muted-foreground font-semibold">{hint}</p>
+
+      <div
+        key={currentStep}
+        className={`grid grid-cols-2 gap-3 animate-pop-in ${disabled ? "opacity-60 pointer-events-none select-none" : ""}`}
+      >
+        {options.map((option) => {
+          const isPicked = picked === option.value;
+          return (
             <button
               key={option.value}
               onClick={() => handleOptionClick(option)}
               disabled={disabled}
-              className={
-                "flex flex-col items-center justify-center px-2 py-5 bg-blue-50 rounded-xl border-2 border-blue-100 hover:bg-blue-200 hover:scale-105 transition transform duration-150 shadow-md hover:shadow-lg text-base sm:text-lg font-bold focus:outline-none" +
-                (disabled ? " opacity-50 cursor-not-allowed pointer-events-none" : "")
-              }
-              style={{ minHeight: 85, fontSize: "1.15rem", letterSpacing: "0.01em" }}
+              className={`tap flex flex-col items-center justify-center gap-2 min-h-[112px] rounded-3xl border-2 px-3 py-4 font-display font-bold text-base
+                ${isPicked
+                  ? "border-primary bg-primary-soft shadow-glow"
+                  : "border-border bg-card hover:border-primary/50 hover:bg-primary-soft/50 shadow-soft"}
+                focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30`}
             >
-              <span style={{ fontSize: 38 }}>{option.emoji}</span>
-              <span className="mt-2">{option.label}</span>
+              <span className="text-4xl leading-none" aria-hidden>{option.emoji}</span>
+              <span className="text-center leading-tight">{option.label}</span>
             </button>
-          ))}
-        </div>
-        <div className="mt-6 flex justify-center space-x-3">
+          );
+        })}
+      </div>
+
+      <div className="mt-5 flex items-center justify-between">
+        <button
+          onClick={goBack}
+          disabled={currentStep === 0 || disabled}
+          className="text-sm font-bold text-muted-foreground disabled:opacity-0 transition"
+        >
+          ← Back
+        </button>
+        <div className="flex gap-2">
           {steps.map((_, idx) => (
-            <div
+            <span
               key={idx}
-              className={`w-3 h-3 rounded-full ${currentStep === idx ? "bg-blue-400" : "bg-blue-100"} transition`}
+              className={`h-2.5 rounded-full transition-all ${
+                currentStep === idx ? "w-6 bg-primary" : idx < currentStep ? "w-2.5 bg-primary/50" : "w-2.5 bg-muted"
+              }`}
             />
           ))}
         </div>
-        {/* Feedback messages (saving/celebrate) slot */}
-        {children}
+        <span className="w-10" />
       </div>
-    </div>
+
+      {children}
+    </section>
   );
 };
 
 export default MigraineStepWizard;
-
