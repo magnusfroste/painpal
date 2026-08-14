@@ -32,24 +32,16 @@ export function useAssistantAnalysis({ history, assistantId }: AnalysisOptions) 
           content: `Entry #${idx + 1}: Where: ${entry.where}, Amount: ${entry.amount}, When: ${entry.when}, Cause: ${entry.cause}`,
         }));
 
-        // Call the edge function instead of the OpenAI API directly
-        const response = await fetch(
-          "https://umjqoizuhfrxzjgrdvei.functions.supabase.co/painpal-assistant",
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ chatHistory }),
-          }
+        // Call the Lovable Cloud edge function
+        const { data: result, error: fnError } = await supabase.functions.invoke(
+          "painpal-assistant",
+          { body: { chatHistory } }
         );
 
-        if (!response.ok) {
-          throw new Error(`Assistant error: ${response.statusText}`);
-        }
-        const result = await response.json();
-        if (result.error) {
-          throw new Error(result.error);
-        }
-        if (!cancelled) setAnalysis(result.analysis);
+        if (fnError) throw fnError;
+        if (result?.error) throw new Error(result.error);
+        if (!cancelled) setAnalysis(result?.analysis ?? null);
+
       } catch (err: any) {
         if (!cancelled) {
           setError(
