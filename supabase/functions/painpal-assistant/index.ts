@@ -1,128 +1,85 @@
-import "https://deno.land/x/xhr@0.1.0/mod.ts";
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-
-const openAIApiKey = Deno.env.get("OPENAI_API_KEY");
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-async function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
+const SYSTEM_PROMPT = `You are "Migraine Doctor", a warm, concise assistant inside the PainPal migraine tracking app.
+You receive a list of the user's recent migraine/headache entries (location, intensity, time of day, suspected cause).
+Analyse them and answer with:
+1. A short summary of patterns you notice (timing, triggers, locations, intensity trends).
+2. 2-4 concrete, practical suggestions.
+Keep it under 180 words, friendly and plain language. Never give a medical diagnosis; remind the user to consult a doctor for persistent or severe symptoms.`;
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    const apiKey = Deno.env.get("LOVABLE_API_KEY");
+    if (!apiKey) {
+      return new Response(JSON.stringify({ error: "AI is not configured." }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const { chatHistory } = await req.json();
-    const assistantId = "asst_QdGLwLL2mn8p46MZ0xuryV3S";
+    if (!Array.isArray(chatHistory) || chatHistory.length === 0) {
+      return new Response(JSON.stringify({ error: "No entries to analyse." }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
-    // 1. Create a thread with history
-    const createThreadResp = await fetch("https://api.openai.com/v1/threads", {
+    const messages = [
+      { role: "system", content: SYSTEM_PROMPT },
+      ...chatHistory.slice(-20).map((m: any) => ({
+        role: m.role === "assistant" ? "assistant" : "user",
+        content: String(m.content ?? ""),
+      })),
+      { role: "user", content: "Please analyse my entries above." },
+    ];
+
+    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${openAIApiKey}`,
         "Content-Type": "application/json",
-        "OpenAI-Beta": "assistants=v2",
+        "Lovable-API-Key": apiKey,
+        "X-Lovable-AIG-SDK": "fetch",
       },
-      body: JSON.stringify({
-        messages: chatHistory.map(msg => ({
-          role: msg.role,
-          content: msg.content,
-        }))
-      }),
+      body: JSON.stringify({ model: "google/gemini-3.6-flash", messages }),
     });
 
-    if (!createThreadResp.ok) {
-      const text = await createThreadResp.text();
-      console.error("Failed to create thread:", text);
-      return new Response(JSON.stringify({ error: `Error creating thread: ${text}` }), {
+    if (res.status === 429) {
+      return new Response(JSON.stringify({ error: "Too many requests right now. Please try again in a moment." }), {
+        status: 429,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (res.status === 402) {
+      return new Response(JSON.stringify({ error: "AI credits are exhausted. Please top up to continue." }), {
+        status: 402,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (!res.ok) {
+      const text = await res.text();
+      console.error("AI gateway error:", res.status, text);
+      return new Response(JSON.stringify({ error: "The assistant could not answer right now." }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const thread = await createThreadResp.json();
+    const data = await res.json();
+    const analysis = data?.choices?.[0]?.message?.content ?? "";
 
-    // 2. Create a run
-    const runResp = await fetch(`https://api.openai.com/v1/threads/${thread.id}/runs`, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${openAIApiKey}`,
-        "Content-Type": "application/json",
-        "OpenAI-Beta": "assistants=v2",
-      },
-      body: JSON.stringify({
-        assistant_id: assistantId,
-      }),
-    });
-
-    if (!runResp.ok) {
-      const text = await runResp.text();
-      console.error("Failed to create run:", text);
-      return new Response(JSON.stringify({ error: `Error creating run: ${text}` }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const run = await runResp.json();
-
-    // 3. Poll for run completion
-    let status = run.status;
-    let runId = run.id;
-    const maxAttempts = 40;
-    let attempts = 0;
-    let outputMessages = [];
-    while (status !== "completed" && status !== "failed" && attempts < maxAttempts) {
-      await sleep(500);
-      attempts++;
-      const pollResp = await fetch(`https://api.openai.com/v1/threads/${thread.id}/runs/${runId}`, {
-        method: "GET",
-        headers: {
-          "Authorization": `Bearer ${openAIApiKey}`,
-          "OpenAI-Beta": "assistants=v2",
-        },
-      });
-      const pollData = await pollResp.json();
-      status = pollData.status;
-      if (status === "completed") {
-        // Fetch the messages from the thread
-        const msgResp = await fetch(`https://api.openai.com/v1/threads/${thread.id}/messages`, {
-          method: "GET",
-          headers: {
-            "Authorization": `Bearer ${openAIApiKey}`,
-            "OpenAI-Beta": "assistants=v2",
-          },
-        });
-        const msgData = await msgResp.json();
-        // Find assistant messages
-        outputMessages = msgData.data
-          .filter((m: any) => m.role === "assistant")
-          .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-        break;
-      }
-    }
-
-    if (status !== "completed" || outputMessages.length === 0) {
-      return new Response(JSON.stringify({ error: "Migraine Doctor could not provide an answer in time. Please try again." }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const aiText = outputMessages[0].content?.[0]?.text?.value
-      || outputMessages[0].content
-      || "Couldn't understand.";
-
-    return new Response(JSON.stringify({ analysis: aiText }), {
+    return new Response(JSON.stringify({ analysis }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err) {
-    console.error("PainPal Assistant API error:", err);
+    console.error("PainPal Assistant error:", err);
     return new Response(JSON.stringify({ error: "Trouble talking to Migraine Doctor. Please try again soon!" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
