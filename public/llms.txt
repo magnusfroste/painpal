@@ -1,0 +1,10 @@
+# PainPal
+
+> A headache and migraine diary for kids and teens: log episodes in seconds, spot patterns and share clear reports with the doctor.
+
+PainPal makes headache tracking simple and engaging for children. Kids log pain level, symptoms and possible triggers in a few taps, and the app shows insights and patterns over time that families can share with their doctor. It is built for children and teens with recurring headaches or migraines, and for their parents. Installable as a mobile web app (PWA); sign-in required to keep your diary.
+
+## Links
+
+- [Open PainPal](https://painpal.lovable.app/)
+- [Sign in](https://painpal.lovable.app/auth)
